@@ -22,7 +22,6 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/scopedcss/bundle/ventaapp.styles.css
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/scopedcss/projectbundle/ventaapp.bundle.scp.css
-/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/cvj87q0uxn-b9sayid5wm.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/bid1lpa9lh-61n19gt1b8.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/zxybw4xpgw-xtxxf3hu2r.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/cdx0cs0otn-bqjiyaj88i.gz
@@ -95,3 +94,4 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ventaapp.pdb
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ventaapp.genruntimeconfig.cache
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ref/ventaapp.dll
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/cvj87q0uxn-26t0p4f71u.gz
