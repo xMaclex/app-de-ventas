@@ -83,8 +83,6 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/zlkd2skyfi-muycvpuwrr.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/jimw719cyb-87fc7y1x7t.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/rx2r30qk1h-mlv21k5csn.gz
-/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/bmw8043fiy-fee5102jj3.gz
-/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/dns86pujlt-fee5102jj3.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/staticwebassets.build.json
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/staticwebassets.build.json.cache
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/staticwebassets.development.json
@@ -94,4 +92,6 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ventaapp.pdb
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ventaapp.genruntimeconfig.cache
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ref/ventaapp.dll
-/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/cvj87q0uxn-26t0p4f71u.gz
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/cvj87q0uxn-g6e5sn4tig.gz
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/bmw8043fiy-jan0b7zby9.gz
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/dns86pujlt-jan0b7zby9.gz
