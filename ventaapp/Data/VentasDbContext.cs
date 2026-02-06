@@ -32,6 +32,7 @@ public class VentasDbContext : DbContext
         //ventas
         modelBuilder.Entity<Venta>()
             .HasKey(v => v.IdVenta);
+            
         modelBuilder.Entity<Venta>()
             .HasOne(v => v.Cliente)
             .WithMany(c => c.Ventas)
@@ -44,10 +45,12 @@ public class VentasDbContext : DbContext
             .HasOne(f => f.Venta)
             .WithMany(v => v.Facturas)
             .HasForeignKey(f => f.IdVenta);
+
         modelBuilder.Entity<Factura>()
             .HasOne(f => f.Cliente)
             .WithMany(c => c.Facturas)
             .HasForeignKey(f => f.IdCliente);
+
         modelBuilder.Entity<Factura>()
             .HasOne(f => f.Producto)
             .WithMany(p => p.Facturas)
