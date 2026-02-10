@@ -9,7 +9,7 @@ builder.Services.AddControllersWithViews();
 // Agregar DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<VentasDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 4, 28))));
 
 var app = builder.Build();
 
