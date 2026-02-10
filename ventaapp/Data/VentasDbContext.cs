@@ -12,6 +12,9 @@ public class VentasDbContext : DbContext
         public DbSet<Producto> Productos { get; set; } 
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<Factura> Facturas { get; set; }
+        public DbSet<Pais> Paises { get; set; }
+        public DbSet<Ciudad> Ciudades { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,10 +23,33 @@ public class VentasDbContext : DbContext
 
         //configuracion de cada tabla
 
+        //Paises
+        modelBuilder.Entity<Pais>()
+        .HasKey(p => p.IdPais);
+
+        //Ciudades
+        modelBuilder.Entity<Ciudad>()
+        .HasKey(c => c.IdCiudad);
+
+        modelBuilder.Entity<Ciudad>()
+            .HasOne(c => c.Pais)
+            .WithMany(p => p.Ciudades)
+            .HasForeignKey(c => c.IdPais);
+
         //clientes
 
         modelBuilder.Entity<Clientes>()
         .HasKey(c => c.IdCliente);
+
+        modelBuilder.Entity<Clientes>()
+            .HasOne(c => c.Pais)
+            .WithMany(p => p.Clientes)
+            .HasForeignKey(c => c.IdPais);
+
+        modelBuilder.Entity<Clientes>()
+            .HasOne(c => c.Ciudad)
+            .WithMany(ci => ci.Clientes)
+            .HasForeignKey(c => c.IdCiudad);
 
         //productos
         modelBuilder.Entity<Producto>()

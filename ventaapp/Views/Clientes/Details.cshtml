@@ -1,0 +1,271 @@
+@model ventaapp.Models.Clientes
+
+@{
+    ViewData["Title"] = "Detalles del Cliente";
+}
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-person-circle"></i> Perfil del Cliente</h2>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.IdCliente" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del cliente -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Información Personal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="bi bi-hash"></i> ID Cliente:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            @Model.IdCliente
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="bi bi-person"></i> Nombre Completo:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="text-primary">@Model.NombreCompleto</h5>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="bi bi-card-text"></i> Tipo de Documento:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <span class="badge bg-secondary">@Model.TipoDocumento</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="bi bi-credit-card"></i> Número de Documento:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            @Model.NumeroDocumento
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="bi bi-envelope"></i> Correo Electrónico:</strong>
+                        </div>
+                        <div class="col-md-8">
+                            <a href="mailto:@Model.CorreoElectronico">@Model.CorreoElectronico</a>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong><i class="bi bi-geo-alt-fill"></i> Ubicacion: </strong>
+                        </div>
+                        <div class="col-md-8">
+                            <span>
+                                @Model.Ciudad?.Nombre
+                                @(Model.Ciudad != null && Model.Pais != null ? ", " : "")
+                                @Model.Pais?.Nombre
+                            </span>
+                        </div>
+                    </div>
+                    
+                </div> 
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="col-md-4">
+            <div class="card mb-3 text-white bg-primary">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Compras</h6>
+                    <h2>@ViewBag.TotalCompras</h2>
+                    <small>Transacciones realizadas</small>
+                </div>
+            </div>
+
+            <div class="card mb-3 text-white bg-success">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Gastado</h6>
+                    <h2>$@ViewBag.TotalGastado.ToString("N2")</h2>
+                    <small>Monto total</small>
+                </div>
+            </div>
+
+            <div class="card mb-3 text-white bg-warning">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Ticket Promedio</h6>
+                    <h2>$@ViewBag.TicketPromedio.ToString("N2")</h2>
+                    <small>Promedio por compra</small>
+                </div>
+            </div>
+
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Última Compra</h6>
+                    @if (ViewBag.UltimaCompra != null)
+                    {
+                        <p class="mb-0">@ViewBag.UltimaCompra.ToString("dd/MM/yyyy")</p>
+                        <small>@ViewBag.UltimaCompra.ToString("hh:mm tt")</small>
+                    }
+                    else
+                    {
+                        <p class="mb-0">Sin compras</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de compras -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial de Compras</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Ventas.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID Venta</th>
+                                        <th>Fecha</th>
+                                        <th>Subtotal</th>
+                                        <th>ITBIS</th>
+                                        <th>Total</th>
+                                        <th>Método Pago</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var venta in Model.Ventas.OrderByDescending(v => v.Fechaventa))
+                                    {
+                                        <tr>
+                                            <td>@venta.IdVenta</td>
+                                            <td>@venta.Fechaventa.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>$@venta.Subtotal.ToString("N2")</td>
+                                            <td>$@venta.Itbis.ToString("N2")</td>
+                                            <td><strong>$@venta.Total.ToString("N2")</strong></td>
+                                            <td>
+                                                <span class="badge bg-info">@venta.MetodoPago</span>
+                                            </td>
+                                            <td>
+                                                @if (venta.Estado == "Completada")
+                                                {
+                                                    <span class="badge bg-success">@venta.Estado</span>
+                                                }
+                                                else if (venta.Estado == "Pendiente")
+                                                {
+                                                    <span class="badge bg-warning">@venta.Estado</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">@venta.Estado</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-cart-x" style="font-size: 4rem; color: #ccc;"></i>
+                            <p class="text-muted mt-3">Este cliente aún no ha realizado compras.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de facturas -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Facturas Emitidas</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Facturas.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Número Factura</th>
+                                        <th>Fecha Emisión</th>
+                                        <th>NCF</th>
+                                        <th>Tipo Comprobante</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var factura in Model.Facturas.OrderByDescending(f => f.FechaEmision))
+                                    {
+                                        <tr>
+                                            <td><strong>@factura.NumeroFactura</strong></td>
+                                            <td>@factura.FechaEmision.ToString("dd/MM/yyyy")</td>
+                                            <td>@factura.Ncf</td>
+                                            <td>
+                                                <span class="badge bg-primary">@factura.TipoComprobanteFiscal</span>
+                                            </td>
+                                            <td>
+                                                @if (factura.Estado == "Activa")
+                                                {
+                                                    <span class="badge bg-success">@factura.Estado</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">@factura.Estado</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-file-earmark-x" style="font-size: 4rem; color: #ccc;"></i>
+                            <p class="text-muted mt-3">No hay facturas emitidas para este cliente.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}
