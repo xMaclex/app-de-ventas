@@ -61,3 +61,4 @@ public class Clientes
    [ForeignKey("IdCiudad")]
    public Ciudad? Ciudad { get; set; }
 }
+
