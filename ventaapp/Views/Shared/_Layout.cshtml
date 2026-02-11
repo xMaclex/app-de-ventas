@@ -64,6 +64,25 @@
                             <i class="bi bi-file-earmark-text"></i> Facturas
                         </a>
                     </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-box-seam"></i> Configuracion
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Productos" asp-action="Index">
+                                <i class="bi bi-list"></i> Usuarios
+                            </a></li>
+                            <li><a class="dropdown-item" asp-controller="Productos" asp-action="Create">
+                                <i class="bi bi-plus-circle"></i> Ajustes
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="bi bi-gear"></i> FeedBack
+                            </a></li>
+                        </ul>
+                    </li>
+                    
                 </ul>
                 <form class="d-flex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"/>
