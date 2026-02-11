@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 10-02-2026 a las 15:26:27
+-- Tiempo de generación: 11-02-2026 a las 19:12:39
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -247,6 +247,13 @@ CREATE TABLE `clientes_tb` (
   `id_pais` int(11) NOT NULL,
   `id_ciudad` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `clientes_tb`
+--
+
+INSERT INTO `clientes_tb` (`id_cliente`, `nombres`, `apellidos`, `tipo_documento`, `numero_documento`, `correo_electronico`, `id_pais`, `id_ciudad`) VALUES
+(2, 'Michael', 'Sanchez Guerrero', 'Cédula', '402-2871667-2', 'Michael.s14070@gmail.com', 146, 146);
 
 -- --------------------------------------------------------
 
@@ -496,6 +503,38 @@ CREATE TABLE `productos_tb` (
   `estado` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `productos_tb`
+--
+
+INSERT INTO `productos_tb` (`id_producto`, `codigo_producto`, `nombre_producto`, `descripcion`, `categoria`, `precio_compra`, `precio_venta`, `impuesto`, `estado`) VALUES
+(1, 'PROD-01', 'MacBook Pro', 'Macbook Pro 2017 Usada', 'Electrónica', 20000.00, 40000.00, 18.00, 'Activo');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuarios_tb`
+--
+
+CREATE TABLE `usuarios_tb` (
+  `id_usuarios` int(11) NOT NULL,
+  `nombre` varchar(50) NOT NULL,
+  `apellidos` varchar(50) NOT NULL,
+  `tipo_documento` varchar(50) NOT NULL,
+  `numero_documento` varchar(20) NOT NULL,
+  `numero_telefono` varchar(20) NOT NULL,
+  `numero_celular` varchar(20) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `clave` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `estado` varchar(20) NOT NULL,
+  `rol` varchar(20) NOT NULL,
+  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ultimo_acceso` datetime NOT NULL,
+  `intentos_fallidos` int(11) NOT NULL,
+  `bloqueado_hasta` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- --------------------------------------------------------
 
 --
@@ -512,7 +551,12 @@ CREATE TABLE `ventas_tb` (
   `metodo_pago` varchar(30) NOT NULL,
   `tipo_comprobante` varchar(30) NOT NULL,
   `numero_comprobante` varchar(20) NOT NULL,
-  `estado` varchar(20) NOT NULL
+  `estado` varchar(20) NOT NULL,
+  `descuento` decimal(10,2) DEFAULT 0.00,
+  `tipo_descuento` varchar(20) DEFAULT 'Monto',
+  `tipo_venta` varchar(20) DEFAULT 'Contado',
+  `notas` varchar(500) DEFAULT '',
+  `id_usuarios` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -531,7 +575,8 @@ ALTER TABLE `ciudades_tb`
 --
 ALTER TABLE `clientes_tb`
   ADD PRIMARY KEY (`id_cliente`),
-  ADD KEY `id_pais` (`id_pais`);
+  ADD KEY `id_pais` (`id_pais`),
+  ADD KEY `id_ciudad` (`id_ciudad`);
 
 --
 -- Indices de la tabla `facturas_tb`
@@ -557,11 +602,18 @@ ALTER TABLE `productos_tb`
   ADD UNIQUE KEY `codigo del producto` (`codigo_producto`);
 
 --
+-- Indices de la tabla `usuarios_tb`
+--
+ALTER TABLE `usuarios_tb`
+  ADD PRIMARY KEY (`id_usuarios`);
+
+--
 -- Indices de la tabla `ventas_tb`
 --
 ALTER TABLE `ventas_tb`
   ADD PRIMARY KEY (`id_venta`),
-  ADD KEY `ventas_tb_ibfk_1` (`id_cliente`);
+  ADD KEY `ventas_tb_ibfk_1` (`id_cliente`),
+  ADD KEY `id_usuarios` (`id_usuarios`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -577,7 +629,7 @@ ALTER TABLE `ciudades_tb`
 -- AUTO_INCREMENT de la tabla `clientes_tb`
 --
 ALTER TABLE `clientes_tb`
-  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `facturas_tb`
@@ -595,7 +647,13 @@ ALTER TABLE `paises_tb`
 -- AUTO_INCREMENT de la tabla `productos_tb`
 --
 ALTER TABLE `productos_tb`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `usuarios_tb`
+--
+ALTER TABLE `usuarios_tb`
+  MODIFY `id_usuarios` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas_tb`
@@ -617,7 +675,8 @@ ALTER TABLE `ciudades_tb`
 -- Filtros para la tabla `clientes_tb`
 --
 ALTER TABLE `clientes_tb`
-  ADD CONSTRAINT `clientes_tb_ibfk_1` FOREIGN KEY (`id_pais`) REFERENCES `paises_tb` (`id_pais`);
+  ADD CONSTRAINT `clientes_tb_ibfk_1` FOREIGN KEY (`id_pais`) REFERENCES `paises_tb` (`id_pais`),
+  ADD CONSTRAINT `clientes_tb_ibfk_2` FOREIGN KEY (`id_ciudad`) REFERENCES `ciudades_tb` (`id_ciudad`);
 
 --
 -- Filtros para la tabla `facturas_tb`
@@ -631,7 +690,8 @@ ALTER TABLE `facturas_tb`
 -- Filtros para la tabla `ventas_tb`
 --
 ALTER TABLE `ventas_tb`
-  ADD CONSTRAINT `ventas_tb_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes_tb` (`id_cliente`);
+  ADD CONSTRAINT `ventas_tb_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes_tb` (`id_cliente`),
+  ADD CONSTRAINT `ventas_tb_ibfk_2` FOREIGN KEY (`id_usuarios`) REFERENCES `usuarios_tb` (`id_usuarios`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
