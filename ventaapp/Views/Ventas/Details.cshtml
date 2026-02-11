@@ -1,0 +1,286 @@
+@model ventaapp.Models.Venta
+
+@{
+    ViewData["Title"] = $"Venta #{Model.IdVenta}";
+}
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-receipt"></i> Detalle de Venta #@Model.IdVenta</h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-primary">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Columna Izquierda - Información de la Venta -->
+        <div class="col-md-8">
+            <!-- Información General -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información de la Venta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">ID Venta:</dt>
+                                <dd class="col-sm-7"><strong>#@Model.IdVenta</strong></dd>
+
+                                <dt class="col-sm-5">Fecha y Hora:</dt>
+                                <dd class="col-sm-7">@Model.Fechaventa.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                                <dt class="col-sm-5">Estado:</dt>
+                                <dd class="col-sm-7">
+                                    @if (Model.Estado == "Completada")
+                                    {
+                                        <span class="badge bg-success">@Model.Estado</span>
+                                    }
+                                    else if (Model.Estado == "Anulada")
+                                    {
+                                        <span class="badge bg-danger">@Model.Estado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">@Model.Estado</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-5">Usuario:</dt>
+                               <dd class="col-sm-7">@Model.//Usuarios</dd> 
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">Comprobante:</dt>
+                                <dd class="col-sm-7"><code>@Model.NumeroComprobante</code></dd>
+
+                                <dt class="col-sm-5">Tipo:</dt>
+                                <dd class="col-sm-7">
+                                    <span class="badge bg-info">@Model.TipoComprobante</span>
+                                </dd>
+
+                                <dt class="col-sm-5">Método Pago:</dt>
+                                <dd class="col-sm-7">
+                                    <span class="badge bg-secondary">@Model.MetodoPago</span>
+                                </dd>
+
+                                <dt class="col-sm-5">Tipo Venta:</dt>
+                                <dd class="col-sm-7">@Model.TipoVenta</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                   @if(!string.IsNullOrEmpty(Model.Notas))
+                    {
+                        <div class="alert alert-info mb-0">
+                            <strong><i class="bi bi-sticky"></i> Notas:</strong><br>
+                            @Model.//Notas
+                        </div>
+                    } 
+                </div>
+            </div>
+
+            <!-- Información del Cliente -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> Cliente</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Nombre:</dt>
+                        <dd class="col-sm-9"><strong>@Model.Cliente.NombreCompleto</strong></dd>
+
+                        <dt class="col-sm-3">Documento:</dt>
+                        <dd class="col-sm-9">@Model.Cliente.TipoDocumento: @Model.Cliente.NumeroDocumento</dd>
+
+                        <dt class="col-sm-3">Correo:</dt>
+                        <dd class="col-sm-9">@Model.Cliente.CorreoElectronico</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Detalle de Productos -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cart3"></i> Productos</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Precio Unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Facturas.Any())
+                                {
+                                    @foreach (var factura in Model.Facturas)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@factura.Producto.NombreProducto</strong><br>
+                                                <small class="text-muted">Código: @factura.Producto.CodigoProducto</small>
+                                            </td>
+                                            <td class="text-center">1</td>
+                                            <td class="text-end">$@factura.Producto.PrecioVenta.ToString("N2")</td>
+                                            <td class="text-end">$@factura.Producto.PrecioVenta.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">No hay productos en esta venta</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha - Resumen Financiero -->
+        <div class="col-md-4">
+            <!-- Resumen de Totales -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-calculator"></i> Resumen</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-2">
+                        <dt class="col-6">Subtotal:</dt>
+                        <dd class="col-6 text-end fs-5">$@Model.Subtotal.ToString("N2")</dd>
+                    </dl>
+                    <dl class="row mb-2">
+                        <dt class="col-6">ITBIS (18%):</dt>
+                        <dd class="col-6 text-end fs-5">$@Model.Itbis.ToString("N2")</dd>
+                    </dl>
+
+                        @if (Model.Descuento > 0)
+                    {
+                        <hr>
+                        <dl class="row mb-2">
+                            <dt class="col-6">
+                                <span class="text-danger">Descuento</span><br>
+                                <small class="text-muted">(@Model.//TipoDescuento)</small>
+                            </dt>
+                            <dd class="col-6 text-end text-danger">-$@Model.//Descuento.ToString("N2")</dd>
+                        </dl>
+                    } 
+
+                    <hr>
+                    <dl class="row mb-0">
+                        <dt class="col-6"><h5>TOTAL:</h5></dt>
+                        <dd class="col-6 text-end">
+                            <h3 class="text-success mb-0">$@Model.Total.ToString("N2")</h3>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Comprobante Fiscal -->
+            @if (Model.Facturas.Any())
+            {
+                <div class="card mb-4">
+                    <div class="card-header bg-warning">
+                        <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> Comprobantes Fiscales</h6>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var factura in Model.Facturas.Take(3))
+                        {
+                            <div class="mb-2">
+                                <strong>@factura.NumeroFactura</strong><br>
+                                <small>NCF: @factura.Ncf</small>
+                            </div>
+                        }
+                        @if (Model.Facturas.Count > 3)
+                        {
+                            <small class="text-muted">+ @(Model.Facturas.Count - 3) más...</small>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Acciones -->
+            @if (Model.Estado == "Completada")
+            {
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="mb-0"><i class="bi bi-gear"></i> Acciones</h6>
+                    </div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-danger w-100" 
+                                onclick="anularVenta(@Model.IdVenta)">
+                            <i class="bi bi-x-circle"></i> Anular Venta
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal para anular venta -->
+<div class="modal fade" id="modalAnular" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Anular Venta #@Model.IdVenta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Anular" asp-route-id="@Model.IdVenta" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Esta acción no se puede deshacer. La venta será anulada permanentemente.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Motivo de anulación:</strong></label>
+                        <textarea name="motivoAnulacion" class="form-control" rows="3" required 
+                                  placeholder="Ingrese el motivo de la anulación..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Anulación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script>
+        function anularVenta(idVenta) {
+            const modal = new bootstrap.Modal(document.getElementById('modalAnular'));
+            modal.show();
+        }
+    </script>
+
+    <style>
+        @@media print {
+            .btn, .card-header, nav, footer {
+                display: none !important;
+            }
+        }
+    </style>
+}

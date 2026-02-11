@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ventaapp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f81f284c68de0674b1418e6b118aa4cf641b30b8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3195ff259c62692af95e1625e979fe76081750e0")]
 [assembly: System.Reflection.AssemblyProductAttribute("ventaapp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ventaapp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

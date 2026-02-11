@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+
+
 namespace ventaapp.Models;
 
 [Table("clientes_tb")]
@@ -23,12 +25,14 @@ public class Clientes
 
     [Required(ErrorMessage = "Digite el documento correspondiente")]
     [StringLength(50)]
+    [Display(Name = "Tipo de Documento")]
     [Column("tipo_documento")]
     public string TipoDocumento { get; set; } = string.Empty; 
 
 
     [Required(ErrorMessage = "Digite el documento correspondiente")]
     [StringLength(20)]
+    [Display(Name = "Numero de Documento")]
     [Column("numero_documento")]
     public string NumeroDocumento { get; set; } = string.Empty;
 
@@ -36,6 +40,7 @@ public class Clientes
     [Required(ErrorMessage = "Email obligatorio")]
     [EmailAddress(ErrorMessage = "El formato del correo electronico no es valido")]
     [StringLength(100)]
+    [Display(Name = "Correo Electronico")]
     [Column("correo_electronico")]
     public string CorreoElectronico { get; set; } = string.Empty;
 
