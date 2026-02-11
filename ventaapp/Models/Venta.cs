@@ -85,20 +85,20 @@ namespace ventaapp.Models
         [Column("notas")]
         public string Notas { get; set; } = string.Empty;
 
-        [Display(Name = "Usuario")]
+        [Display(Name = "Usuario: ")]
         [StringLength(100)]
-        [Column("usuario")]
-        public string Usuario { get; set; } = "Sistema";
-
-        
+        [Column("id_usuarios")]
+        public int IdUsuarios { get; set; }
 
         // Relaciones con las tablas
         public Clientes Cliente { get; set; } = new Clientes();
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+
+        public ICollection<Usuarios> Usuarios { get; set; } = new List<Usuarios>();
         
         // Propiedades de navegación adicionales (para el carrito)
         [NotMapped]
-        public List<VentaDetalle> Detalles { get; set; } = new List<VentaDetalle>(); 
+        public List<VentaDetalle> Detalles { get; set; } = new List<VentaDetalle>();
     }
 
     // Clase auxiliar para manejar el detalle de la venta (carrito)
@@ -137,6 +137,6 @@ namespace ventaapp.Models
                     return Venta.Descuento;
             }
         }
-        public decimal TotalFinal => TotalCarrito - DescuentoCalculado; 
+        public decimal TotalFinal => TotalCarrito - DescuentoCalculado;
     }
 }

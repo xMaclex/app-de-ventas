@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 11-02-2026 a las 19:12:39
+-- Tiempo de generación: 11-02-2026 a las 19:17:55
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -273,7 +273,8 @@ CREATE TABLE `facturas_tb` (
   `direccion_empresa` varchar(100) NOT NULL,
   `ncf` varchar(20) NOT NULL,
   `tipo_comprobante_fiscal` varchar(20) NOT NULL,
-  `estado` varchar(20) NOT NULL
+  `estado` varchar(20) NOT NULL,
+  `id_usuarios` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -586,7 +587,8 @@ ALTER TABLE `facturas_tb`
   ADD UNIQUE KEY `Numero de la factura` (`numero_factura`),
   ADD KEY `id_cliente` (`id_cliente`),
   ADD KEY `id_producto` (`id_producto`),
-  ADD KEY `id_venta` (`id_venta`);
+  ADD KEY `id_venta` (`id_venta`),
+  ADD KEY `id_usuarios` (`id_usuarios`);
 
 --
 -- Indices de la tabla `paises_tb`
@@ -684,7 +686,8 @@ ALTER TABLE `clientes_tb`
 ALTER TABLE `facturas_tb`
   ADD CONSTRAINT `facturas_tb_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes_tb` (`id_cliente`),
   ADD CONSTRAINT `facturas_tb_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos_tb` (`id_producto`),
-  ADD CONSTRAINT `facturas_tb_ibfk_3` FOREIGN KEY (`id_venta`) REFERENCES `ventas_tb` (`id_venta`);
+  ADD CONSTRAINT `facturas_tb_ibfk_3` FOREIGN KEY (`id_venta`) REFERENCES `ventas_tb` (`id_venta`),
+  ADD CONSTRAINT `facturas_tb_ibfk_4` FOREIGN KEY (`id_usuarios`) REFERENCES `usuarios_tb` (`id_usuarios`);
 
 --
 -- Filtros para la tabla `ventas_tb`

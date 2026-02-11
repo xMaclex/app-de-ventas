@@ -135,7 +135,7 @@ namespace ventaapp.Controllers
                     TipoVenta = venta.TipoVenta,
                     Notas = venta.Notas ?? string.Empty,
                     Estado = "Completada",
-                    Usuario = "Sistema" // Aquí puedes poner el usuario autenticado
+                    IdUsuarios = venta.IdUsuarios // Aquí puedes poner el usuario autenticado
                 };
 
                 _context.Ventas.Add(nuevaVenta);

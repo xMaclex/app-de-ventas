@@ -84,12 +84,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ventas/CierreCaja.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVudGFzL0NpZXJyZUNhamEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ventas/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVudGFzL0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ventas/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVudGFzL0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ventas/PuntoVenta.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVudGFzL1B1bnRvVmVudGEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ventas/Reportes.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVudGFzL1JlcG9ydGVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/_ViewImports.cshtml]

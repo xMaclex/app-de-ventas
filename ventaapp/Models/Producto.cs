@@ -74,5 +74,6 @@ namespace ventaapp.Models
 
         // Relaciones con las tablas
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+
     }
 }

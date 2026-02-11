@@ -17,6 +17,9 @@ public class Factura
     
     [Column("id_producto")]
     public int IdProducto { get; set; }
+
+    [Column("id_usuarios")]
+    public int IdUsuarios { get; set; }
     
     [Column("numero_factura")]
     public string NumeroFactura { get; set; } = string.Empty;
@@ -46,5 +49,6 @@ public class Factura
     public Venta Venta {get; set;} = new Venta();
     public Clientes Cliente { get; set; } = new Clientes();
     public Producto Producto { get; set; } = new Producto();
+    public Usuarios Usuario { get; set; } = new Usuarios();
 
 }
