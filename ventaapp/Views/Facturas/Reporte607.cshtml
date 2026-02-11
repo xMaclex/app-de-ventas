@@ -1,0 +1,288 @@
+@model IEnumerable<ventaapp.Models.Factura>
+
+@{
+    ViewData["Title"] = "Reporte 607 - Ventas";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-file-earmark-bar-graph"></i> Reporte 607 - Ventas (DGII)</h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-secondary">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <button onclick="exportarExcel()" class="btn btn-success">
+                        <i class="bi bi-file-excel"></i> Exportar Excel
+                    </button>
+                    <a asp-action="Index" class="btn btn-dark">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Período -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Reporte607" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Mes:</label>
+                    <select name="mes" class="form-select">
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@i" selected="@(i == ViewBag.Mes)">
+                                @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Año:</label>
+                    <select name="año" class="form-select">
+                        @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
+                        {
+                            <option value="@i" selected="@(i == ViewBag.Año)">@i</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Consultar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumen Ejecutivo -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> 
+                        Resumen - @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(ViewBag.Mes) @ViewBag.Año
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded">
+                                <h6 class="text-muted">Total Facturas</h6>
+                                <h2 class="text-primary">@ViewBag.TotalFacturas</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded">
+                                <h6 class="text-muted">Ventas (Sin ITBIS)</h6>
+                                <h2 class="text-success">$@ViewBag.TotalVentas.ToString("N2")</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded">
+                                <h6 class="text-muted">ITBIS Recaudado</h6>
+                                <h2 class="text-warning">$@ViewBag.TotalItbis.ToString("N2")</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded">
+                                <h6 class="text-muted">Total General</h6>
+                                <h2 class="text-info">$@ViewBag.TotalGeneral.ToString("N2")</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen por Tipo de Comprobante -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-pie-chart"></i> Resumen por Tipo de Comprobante</h6>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.PorTipo != null && ViewBag.PorTipo.Count > 0)
+                    {
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tipo NCF</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Monto Total</th>
+                                    <th class="text-end">ITBIS</th>
+                                    <th class="text-center">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tipo in ViewBag.PorTipo)
+                                {
+                                    var porcentaje = (tipo.MontoTotal / ViewBag.TotalGeneral) * 100;
+                                    <tr>
+                                        <td>
+                                            <strong>@tipo.Tipo</strong>
+                                            @switch (tipo.Tipo)
+                                            {
+                                                case "B01":
+                                                    <small class="text-muted"> - Crédito Fiscal</small>
+                                                    break;
+                                                case "B02":
+                                                    <small class="text-muted"> - Consumidor Final</small>
+                                                    break;
+                                                case "B14":
+                                                    <small class="text-muted"> - Régimen Especial</small>
+                                                    break;
+                                                case "B15":
+                                                    <small class="text-muted"> - Gubernamental</small>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td class="text-center">@tipo.Cantidad</td>
+                                        <td class="text-end">$@tipo.MontoTotal.ToString("N2")</td>
+                                        <td class="text-end">$@tipo.MontoItbis.ToString("N2")</td>
+                                        <td class="text-center">
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar bg-success" style="width: @porcentaje%">
+                                                    @porcentaje.ToString("N1")%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-success">
+                                <tr>
+                                    <td><strong>TOTAL</strong></td>
+                                    <td class="text-center"><strong>@ViewBag.TotalFacturas</strong></td>
+                                    <td class="text-end"><strong>$@ViewBag.TotalGeneral.ToString("N2")</strong></td>
+                                    <td class="text-end"><strong>$@ViewBag.TotalItbis.ToString("N2")</strong></td>
+                                    <td class="text-center"><strong>100%</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted py-4">No hay datos para el período seleccionado</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle de Facturas (Formato DGII 607) -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0"><i class="bi bi-table"></i> Detalle de Operaciones (Formato DGII)</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>RNC/Cédula</th>
+                                        <th>Tipo ID</th>
+                                        <th>Número NCF</th>
+                                        <th>NCF Modificado</th>
+                                        <th>Tipo Ingreso</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end">Fact. Sin ITBIS</th>
+                                        <th class="text-end">Fact. Con ITBIS</th>
+                                        <th class="text-end">ITBIS</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var factura in Model)
+                                    {
+                                        var montoSinItbis = factura.MontoTotal - factura.MontoItbis;
+                                        <tr>
+                                            <td><small>@factura.Cliente.NumeroDocumento</small></td>
+                                            <td><small>@factura.Cliente.TipoDocumento</small></td>
+                                            <td><small>@factura.Ncf</small></td>
+                                            <td><small>-</small></td>
+                                            <td><small>@factura.TipoComprobanteFiscal</small></td>
+                                            <td><small>@factura.FechaEmision.ToString("dd/MM/yyyy")</small></td>
+                                            <td class="text-end"><small>$@montoSinItbis.ToString("N2")</small></td>
+                                            <td class="text-end"><small>$@factura.MontoTotal.ToString("N2")</small></td>
+                                            <td class="text-end"><small>$@factura.MontoItbis.ToString("N2")</small></td>
+                                            <td class="text-end"><small><strong>$@factura.MontoTotal.ToString("N2")</strong></small></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-primary">
+                                    <tr>
+                                        <td colspan="6" class="text-end"><strong>TOTALES:</strong></td>
+                                        <td class="text-end"><strong>$@ViewBag.TotalVentas.ToString("N2")</strong></td>
+                                        <td class="text-end"><strong>$@ViewBag.TotalGeneral.ToString("N2")</strong></td>
+                                        <td class="text-end"><strong>$@ViewBag.TotalItbis.ToString("N2")</strong></td>
+                                        <td class="text-end"><strong>$@ViewBag.TotalGeneral.ToString("N2")</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                            <p class="text-muted mt-3">No hay facturas para el período seleccionado.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notas Importantes -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Notas Importantes</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Este reporte debe ser presentado mensualmente a la DGII a más tardar el día 20 del mes siguiente.</li>
+                        <li>Verifique que todos los NCF estén dentro del rango autorizado por la DGII.</li>
+                        <li>Las facturas anuladas no se incluyen en este reporte.</li>
+                        <li>Mantenga respaldo de este reporte por un período de 10 años.</li>
+                        <li>Formato generado según especificaciones de la DGII (Norma 01-07).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script>
+        function exportarExcel() {
+            alert('La funcionalidad de exportación a Excel se implementará próximamente.\n\nPor ahora puede usar la función de imprimir y guardar como PDF.');
+        }
+    </script>
+
+    <style>
+        @@media print {
+            .btn, nav, footer {
+                display: none !important;
+            }
+            .card {
+                border: 1px solid #000 !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+}

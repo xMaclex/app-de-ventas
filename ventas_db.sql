@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 11-02-2026 a las 19:17:55
+-- Tiempo de generación: 11-02-2026 a las 21:53:45
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -274,6 +274,10 @@ CREATE TABLE `facturas_tb` (
   `ncf` varchar(20) NOT NULL,
   `tipo_comprobante_fiscal` varchar(20) NOT NULL,
   `estado` varchar(20) NOT NULL,
+  `motivo_anulacion` varchar(500) DEFAULT '',
+  `fecha_anulacion` datetime DEFAULT NULL,
+  `monto_total` decimal(10,2) DEFAULT 0.00,
+  `monto_itbis` decimal(10,2) DEFAULT 0.00,
   `id_usuarios` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -514,6 +518,32 @@ INSERT INTO `productos_tb` (`id_producto`, `codigo_producto`, `nombre_producto`,
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `secuencias_ncf_tb`
+--
+
+CREATE TABLE `secuencias_ncf_tb` (
+  `id_secuencia` int(11) NOT NULL,
+  `tipo_comprobante` varchar(3) NOT NULL,
+  `numero_inicial` bigint(20) NOT NULL,
+  `numero_final` bigint(20) NOT NULL,
+  `numero_actual` bigint(20) NOT NULL,
+  `fecha_vencimiento` date NOT NULL,
+  `activa` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `secuencias_ncf_tb`
+--
+
+INSERT INTO `secuencias_ncf_tb` (`id_secuencia`, `tipo_comprobante`, `numero_inicial`, `numero_final`, `numero_actual`, `fecha_vencimiento`, `activa`) VALUES
+(1, 'B01', 1, 10000, 1, '2026-12-31', 1),
+(2, 'B02', 1, 50000, 1, '2026-12-31', 1),
+(3, 'B14', 1, 5000, 1, '2026-12-31', 1),
+(4, 'B15', 1, 5000, 1, '2026-12-31', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuarios_tb`
 --
 
@@ -604,6 +634,14 @@ ALTER TABLE `productos_tb`
   ADD UNIQUE KEY `codigo del producto` (`codigo_producto`);
 
 --
+-- Indices de la tabla `secuencias_ncf_tb`
+--
+ALTER TABLE `secuencias_ncf_tb`
+  ADD PRIMARY KEY (`id_secuencia`),
+  ADD KEY `idx_tipo` (`tipo_comprobante`),
+  ADD KEY `idx_activa` (`activa`);
+
+--
 -- Indices de la tabla `usuarios_tb`
 --
 ALTER TABLE `usuarios_tb`
@@ -650,6 +688,12 @@ ALTER TABLE `paises_tb`
 --
 ALTER TABLE `productos_tb`
   MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `secuencias_ncf_tb`
+--
+ALTER TABLE `secuencias_ncf_tb`
+  MODIFY `id_secuencia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios_tb`

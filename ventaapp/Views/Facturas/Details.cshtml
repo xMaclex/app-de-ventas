@@ -1,0 +1,256 @@
+@model ventaapp.Models.Factura
+
+@{
+    ViewData["Title"] = $"Factura {Model.NumeroFactura}";
+}
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-file-earmark-text"></i> Factura @Model.NumeroFactura</h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-secondary">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <a asp-action="DescargarPDF" asp-route-id="@Model.IdFactura" class="btn btn-danger">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </a>
+                    <form asp-action="EnviarCorreo" asp-route-id="@Model.IdFactura" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-envelope"></i> Enviar por Email
+                        </button>
+                    </form>
+                    <a asp-action="Index" class="btn btn-dark">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Factura (Estilo Comprobante Fiscal) -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4><i class="bi bi-building"></i> @Model.NombreEmpresa</h4>
+                            <p class="mb-0">RNC: @Model.RncEmpresa</p>
+                            <p class="mb-0">@Model.DireccionEmpresa</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h3>FACTURA</h3>
+                            <p class="mb-0"><strong>No. @Model.NumeroFactura</strong></p>
+                            <p class="mb-0">Fecha: @Model.FechaEmision.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- NCF -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Número de Comprobante Fiscal (NCF):</strong><br>
+                                <h4 class="mb-0">@Model.Ncf</h4>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <strong>Tipo de Comprobante:</strong><br>
+                                <span class="badge bg-primary fs-6">@Model.TipoNCFDescripcion</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información del Cliente -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="bi bi-person"></i> Datos del Cliente</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Cliente:</strong> @Model.Cliente.NombreCompleto</p>
+                                    <p class="mb-1"><strong>Documento:</strong> @Model.Cliente.TipoDocumento - @Model.Cliente.NumeroDocumento</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Correo:</strong> @Model.Cliente.CorreoElectronico</p>
+                                    <p class="mb-1"><strong>Venta No.:</strong> #@Model.IdVenta</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalle de Productos -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2"><i class="bi bi-box-seam"></i> Detalle de la Factura</h5>
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-end">Precio Unit.</th>
+                                        <th class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.Producto.CodigoProducto</td>
+                                        <td>
+                                            <strong>@Model.Producto.NombreProducto</strong><br>
+                                            <small class="text-muted">@Model.Producto.Descripcion</small>
+                                        </td>
+                                        <td class="text-center">1</td>
+                                        <td class="text-end">$@Model.Producto.PrecioVenta.ToString("N2")</td>
+                                        <td class="text-end">$@Model.Producto.PrecioVenta.ToString("N2")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Totales -->
+                    <div class="row">
+                        <div class="col-md-7"></div>
+                        <div class="col-md-5">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="text-end"><strong>Subtotal:</strong></td>
+                                    <td class="text-end">$@((Model.MontoTotal - Model.MontoItbis).ToString("N2"))</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end"><strong>ITBIS (@Model.Producto.Impuesto%):</strong></td>
+                                    <td class="text-end">$@Model.MontoItbis.ToString("N2")</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td class="text-end"><h5>TOTAL:</h5></td>
+                                    <td class="text-end"><h4 class="text-primary">$@Model.MontoTotal.ToString("N2")</h4></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="alert @(Model.Estado == "Activa" ? "alert-success" : "alert-danger")">
+                                <strong>Estado de la Factura:</strong>
+                                @if (Model.Estado == "Activa")
+                                {
+                                    <span class="badge bg-success">ACTIVA</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">ANULADA</span>
+                                    <p class="mb-0 mt-2">
+                                        <strong>Motivo:</strong> @Model.MotivoAnulacion<br>
+                                        <strong>Fecha de Anulación:</strong> @Model.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm")
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notas Legales -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <small class="text-muted">
+                                <strong>Nota Legal:</strong> Este documento es un comprobante fiscal válido. 
+                                Conserve este comprobante para fines tributarios y de garantía.
+                                La reproducción total o parcial de este documento sin autorización está prohibida.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center text-muted">
+                    <small>Factura generada electrónicamente - Sistema VentaApp</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Adicionales -->
+    @if (Model.Estado == "Activa")
+    {
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Zona de Peligro</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6>Anular Factura</h6>
+                                <p class="mb-0 text-muted">
+                                    Esta acción es irreversible y anulará permanentemente esta factura.
+                                </p>
+                            </div>
+                            <button type="button" class="btn btn-danger" 
+                                    onclick="anularFactura(@Model.IdFactura)">
+                                <i class="bi bi-x-circle"></i> Anular Factura
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal para anular factura -->
+<div class="modal fade" id="modalAnular" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Anular Factura @Model.NumeroFactura</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>¡Advertencia!</strong> Esta acción no se puede deshacer.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Motivo de anulación:</strong></label>
+                        <textarea name="motivoAnulacion" class="form-control" rows="3" required 
+                                  placeholder="Especifique el motivo de la anulación..."></textarea>
+                        <small class="text-muted">
+                            Este motivo quedará registrado en el sistema y será visible en los reportes fiscales.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Anulación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <script>
+        function anularFactura(idFactura) {
+            const modal = new bootstrap.Modal(document.getElementById('modalAnular'));
+            modal.show();
+        }
+    </script>
+
+    <style>
+        @@media print {
+            .btn, .card-footer, nav, footer, .border-danger {
+                display: none !important;
+            }
+            .card {
+                border: 2px solid #000 !important;
+            }
+        }
+    </style>
+}
