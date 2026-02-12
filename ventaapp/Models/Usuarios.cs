@@ -11,7 +11,7 @@ namespace ventaapp.Models
     {
         [Key]
         [Column("id_usuarios")]
-        public int idUsuario { get; set; }
+        public int IdUsuario { get; set; }
 
         [Required(ErrorMessage = "Digite el nombre")]
         [StringLength(50, ErrorMessage = "Los nombres no pueden exceder los 50 caracteres")]
@@ -85,7 +85,11 @@ namespace ventaapp.Models
         [Column("ultimo_accesoo")]
         public DateTime? UltimoAcceso { get; set; } = DateTime.UtcNow;
 
-        
+
+        //Relaciones entre tablas
+        public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
+
+         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
 
 

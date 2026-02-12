@@ -88,13 +88,13 @@ namespace ventaapp.Models
         [Display(Name = "Usuario: ")]
         [StringLength(100)]
         [Column("id_usuarios")]
-        public int IdUsuarios { get; set; }
+        public int IdUsuario { get; set; }
 
         // Relaciones con las tablas
         public Clientes Cliente { get; set; } = new Clientes();
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
-        public ICollection<Usuarios> Usuarios { get; set; } = new List<Usuarios>();
+        public Usuarios Usuario { get; set; } = new Usuarios();
         
         // Propiedades de navegación adicionales (para el carrito)
         [NotMapped]

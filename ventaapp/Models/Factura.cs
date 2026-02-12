@@ -92,10 +92,16 @@ namespace ventaapp.Models
         [DataType(DataType.Currency)]
         public decimal MontoItbis { get; set; }
 
+        [Display(Name = "ID del usuario")]
+        [Column("id_usuarios")]
+        [ForeignKey(nameof(Usuario))]
+        public int IdUsuario { get; set; }
+
         // Relaciones con las tablas
         public Venta Venta { get; set; } = new Venta();
         public Clientes Cliente { get; set; } = new Clientes();
         public Producto Producto { get; set; } = new Producto();
+        public Usuarios Usuario { get; set; } = new Usuarios();
 
         // Propiedades calculadas
         [NotMapped]

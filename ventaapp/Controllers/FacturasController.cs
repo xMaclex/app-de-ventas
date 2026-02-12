@@ -39,7 +39,7 @@ namespace ventaapp.Controllers
 
             if (idCliente.HasValue)
                 facturas = facturas.Where(f => f.IdCliente == idCliente.Value);
-
+                
             if (!string.IsNullOrEmpty(tipoComprobante))
                 facturas = facturas.Where(f => f.TipoComprobanteFiscal == tipoComprobante);
 
@@ -88,6 +88,7 @@ namespace ventaapp.Controllers
                 .Include(f => f.Cliente)
                 .Include(f => f.Producto)
                 .Include(f => f.Venta)
+                .Include(f => f.Usuario)
                 .FirstOrDefaultAsync(m => m.IdFactura == id);
 
             if (factura == null)
@@ -186,6 +187,7 @@ namespace ventaapp.Controllers
                 .Include(f => f.Cliente)
                 .Include(f => f.Producto)
                 .Include(f => f.Venta)
+                .Include(f => f.Usuario)
                 .FirstOrDefaultAsync(m => m.IdFactura == id);
 
             if (factura == null)
