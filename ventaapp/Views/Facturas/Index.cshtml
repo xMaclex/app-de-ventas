@@ -123,18 +123,18 @@
                         <label class="form-label">Tipo NCF</label>
                         <select name="tipoComprobante" class="form-select">
                             <option value="">Todos</option>
-                            <option value="B01" selected="@(ViewData["TipoComprobanteFiscal"] == "B01")">B01 - Crédito Fiscal</option>
-                            <option value="B02" selected="@(ViewData["TipoComprobanteFiscal"] == "B02")">B02 - Consumidor Final</option>
-                            <option value="B14" selected="@(ViewData["TipoComprobanteFiscal"] == "B14")">B14 - Régimen Especial</option>
-                            <option value="B15" selected="@(ViewData["TipoComprobanteFiscal"] == "B15")">B15 - Gubernamental</option>
+                            <option value="B01" selected="@(ViewData["TipoComprobante"]?.ToString() == "B01")">B01 - Crédito Fiscal</option>
+                            <option value="B02" selected="@(ViewData["TipoComprobante"]?.ToString() == "B02")">B02 - Consumidor Final</option>
+                            <option value="B14" selected="@(ViewData["TipoComprobante"]?.ToString() == "B14")">B14 - Régimen Especial</option>
+                            <option value="B15" selected="@(ViewData["TipoComprobante"]?.ToString() == "B15")">B15 - Gubernamental</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Estado</label>
                         <select name="estado" class="form-select">
                             <option value="">Todos</option>
-                            <option value="Activa" selected="@(ViewData["Estado"] == "Activa")">Activa</option>
-                            <option value="Anulada" selected="@(ViewData["Estado"] == "Anulada")">Anulada</option>
+                            <option value="Activa" selected="@(ViewData["Estado"]?.ToString() == "Activa")">Activa</option>
+                            <option value="Anulada" selected="@(ViewData["Estado"]?.ToString() == "Anulada")">Anulada</option>
                         </select>
                     </div>
                     <div class="col-md-1 d-flex align-items-end">
