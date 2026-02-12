@@ -1,0 +1,315 @@
+@model IEnumerable<ventaapp.Models.Venta>
+
+@{
+    ViewData["Title"] = "Reportes de Ventas";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-graph-up"></i> Reportes de Ventas</h2>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selector de Período -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <a asp-action="Reportes" asp-route-periodo="hoy" 
+                   class="btn btn-@(ViewBag.Periodo == "hoy" ? "primary" : "outline-primary")">
+                    <i class="bi bi-calendar-day"></i> Hoy
+                </a>
+                <a asp-action="Reportes" asp-route-periodo="semana" 
+                   class="btn btn-@(ViewBag.Periodo == "semana" ? "primary" : "outline-primary")">
+                    <i class="bi bi-calendar-week"></i> Última Semana
+                </a>
+                <a asp-action="Reportes" asp-route-periodo="mes" 
+                   class="btn btn-@(ViewBag.Periodo == "mes" ? "primary" : "outline-primary")">
+                    <i class="bi bi-calendar-month"></i> Este Mes
+                </a>
+            </div>
+            <span class="ms-3 text-muted">
+                <i class="bi bi-calendar-range"></i> 
+                @ViewBag.FechaInicio.ToString("dd/MM/yyyy") - @ViewBag.FechaFin.ToString("dd/MM/yyyy")
+            </span>
+        </div>
+    </div>
+
+    <!-- KPIs Principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Ventas</h6>
+                    <h1>@ViewBag.TotalVentas</h1>
+                    <small>Transacciones completadas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Monto Total</h6>
+                    <h1>$@ViewBag.MontoTotal.ToString("N0")</h1>
+                    <small>Ingresos totales</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Ticket Promedio</h6>
+                    <h1>$@ViewBag.PromedioVenta.ToString("N2")</h1>
+                    <small>Promedio por venta</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Productos Vendidos</h6>
+                    <h1>@Model.Sum(v => v.Facturas.Count)</h1>
+                    <small>Unidades totales</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Ventas por Método de Pago -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-credit-card"></i> Ventas por Método de Pago</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.VentasPorMetodo != null && ViewBag.VentasPorMetodo.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Método</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-center">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var metodo in ViewBag.VentasPorMetodo)
+                                    {
+                                        var porcentaje = (metodo.Total / ViewBag.MontoTotal) * 100;
+                                        <tr>
+                                            <td><strong>@metodo.Metodo</strong></td>
+                                            <td class="text-center">@metodo.Cantidad</td>
+                                            <td class="text-end">$@metodo.Total.ToString("N2")</td>
+                                            <td class="text-center">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: @porcentaje%">
+                                                        @porcentaje.ToString("N1")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">No hay datos disponibles</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 Clientes -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Top 5 Clientes</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.TopClientes != null && ViewBag.TopClientes.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Cliente</th>
+                                        <th class="text-center">Compras</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ var posicion = 1; }
+                                    @foreach (var cliente in ViewBag.TopClientes)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (posicion == 1)
+                                                {
+                                                    <span class="badge bg-warning">🥇</span>
+                                                }
+                                                else if (posicion == 2)
+                                                {
+                                                    <span class="badge bg-secondary">🥈</span>
+                                                }
+                                                else if (posicion == 3)
+                                                {
+                                                    <span class="badge bg-danger">🥉</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-light text-dark">@posicion</span>
+                                                }
+                                            </td>
+                                            <td><strong>@cliente.Cliente</strong></td>
+                                            <td class="text-center">@cliente.Cantidad</td>
+                                            <td class="text-end">$@cliente.Total.ToString("N2")</td>
+                                        </tr>
+                                        posicion++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">No hay datos disponibles</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfica de Ventas por Día -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Ventas por Día</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartVentasPorDia" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listado Detallado de Ventas -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Listado Detallado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Método Pago</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Any())
+                                {
+                                    @foreach (var venta in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-action="Details" asp-route-id="@venta.IdVenta">
+                                                    #@venta.IdVenta
+                                                </a>
+                                            </td>
+                                            <td>@venta.Fechaventa.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@venta.Cliente.NombreCompleto</td>
+                                            <td><span class="badge bg-info">@venta.MetodoPago</span></td>
+                                            <td class="text-end"><strong>$@venta.Total.ToString("N2")</strong></td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                            <p class="text-muted mt-2">No hay ventas en este período.</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        // Datos para el gráfico
+        var ventasPorDia = @Html.Raw(Json.Serialize(
+            Model.GroupBy(v => v.Fechaventa.Date)
+                 .Select(g => new { 
+                     Fecha = g.Key.ToString("dd/MM"), 
+                     Total = g.Sum(v => v.Total) 
+                 })
+                 .OrderBy(x => x.Fecha)
+                 .ToList()
+        ));
+
+        // Crear gráfico
+        var ctx = document.getElementById('chartVentasPorDia').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ventasPorDia.map(v => v.fecha),
+                datasets: [{
+                    label: 'Ventas ($)',
+                    data: ventasPorDia.map(v => v.total),
+                    backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
