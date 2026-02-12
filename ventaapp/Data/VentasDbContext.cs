@@ -14,6 +14,7 @@ public class VentasDbContext : DbContext
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<Pais> Paises { get; set; }
         public DbSet<Ciudad> Ciudades { get; set; }
+        public DbSet<Usuarios> Usuario { get; set; }
 
 
 
@@ -25,11 +26,11 @@ public class VentasDbContext : DbContext
 
         //Paises
         modelBuilder.Entity<Pais>()
-        .HasKey(p => p.IdPais);
+            .HasKey(p => p.IdPais);
 
         //Ciudades
         modelBuilder.Entity<Ciudad>()
-        .HasKey(c => c.IdCiudad);
+            .HasKey(c => c.IdCiudad);
 
         modelBuilder.Entity<Ciudad>()
             .HasOne(c => c.Pais)
@@ -39,7 +40,7 @@ public class VentasDbContext : DbContext
         //clientes
 
         modelBuilder.Entity<Clientes>()
-        .HasKey(c => c.IdCliente);
+            .HasKey(c => c.IdCliente);
 
         modelBuilder.Entity<Clientes>()
             .HasOne(c => c.Pais)
@@ -53,7 +54,7 @@ public class VentasDbContext : DbContext
 
         //productos
         modelBuilder.Entity<Producto>()
-        .HasKey(p => p.IdProducto);
+            .HasKey(p => p.IdProducto);
 
         //ventas
         modelBuilder.Entity<Venta>()
@@ -64,9 +65,15 @@ public class VentasDbContext : DbContext
             .WithMany(c => c.Ventas)
             .HasForeignKey(v => v.IdCliente);
 
+        modelBuilder.Entity<Venta>()
+            .HasOne(v => v.Usuario)
+            .WithMany(u => u.Ventas)
+            .HasForeignKey(v => v.IdUsuario);
+
         //Facturas
         modelBuilder.Entity<Factura>()
             .HasKey(f => f.IdFactura);
+
         modelBuilder.Entity<Factura>()
             .HasOne(f => f.Venta)
             .WithMany(v => v.Facturas)
@@ -81,6 +88,15 @@ public class VentasDbContext : DbContext
             .HasOne(f => f.Producto)
             .WithMany(p => p.Facturas)
             .HasForeignKey(f => f.IdProducto);
+
+        modelBuilder.Entity<Factura>()
+            .HasOne(f => f.Venta)
+            .WithMany(u => u.Facturas)
+            .HasForeignKey(f => f.IdUsuario);
+
+
+            //Uusuarios
+        modelBuilder.Entity<Usuarios>()
+            .HasKey(u => u.IdUsuario);
     }
-    
 }
