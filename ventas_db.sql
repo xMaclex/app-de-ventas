@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 11-02-2026 a las 21:53:45
+-- Tiempo de generación: 13-02-2026 a las 04:41:52
 -- Versión del servidor: 10.4.28-MariaDB
 -- Versión de PHP: 8.2.4
 
@@ -561,10 +561,17 @@ CREATE TABLE `usuarios_tb` (
   `estado` varchar(20) NOT NULL,
   `rol` varchar(20) NOT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
-  `ultimo_acceso` datetime NOT NULL,
+  `ultimo_acceso` datetime DEFAULT current_timestamp(),
   `intentos_fallidos` int(11) NOT NULL,
   `bloqueado_hasta` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuarios_tb`
+--
+
+INSERT INTO `usuarios_tb` (`id_usuarios`, `nombre`, `apellidos`, `tipo_documento`, `numero_documento`, `numero_telefono`, `numero_celular`, `username`, `clave`, `email`, `estado`, `rol`, `fecha_registro`, `ultimo_acceso`, `intentos_fallidos`, `bloqueado_hasta`) VALUES
+(6, 'Michael', 'Sanchez', 'Cédula', '402-2871667-2', '809-361-0349', '8496575458', 'xMaclex', 'mH/4UGG/UlDcdSd7TjBXdBZ4nwfsD+D5Xtx+dg7l0rQ=', 'michael.s140701@gmail.com', 'Activo', 'Administrador', '2026-02-13 02:46:48', '2026-02-12 23:36:20', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -699,7 +706,7 @@ ALTER TABLE `secuencias_ncf_tb`
 -- AUTO_INCREMENT de la tabla `usuarios_tb`
 --
 ALTER TABLE `usuarios_tb`
-  MODIFY `id_usuarios` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_usuarios` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `ventas_tb`
