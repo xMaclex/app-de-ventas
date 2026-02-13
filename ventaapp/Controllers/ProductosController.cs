@@ -94,7 +94,7 @@ namespace ventaapp.Controllers
                 return View(producto);
         }
         //Get producto Greate
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             return View();
         }

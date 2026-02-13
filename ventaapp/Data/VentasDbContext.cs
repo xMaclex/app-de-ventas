@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ventaapp.Models;
 
 namespace ventaapp.Data;
 
-public class VentasDbContext : DbContext
+public class VentasDbContext : IdentityDbContext<ApplicationUser>
 {
     public VentasDbContext(DbContextOptions<VentasDbContext> options) : base(options)
     {
@@ -22,7 +23,12 @@ public class VentasDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+
         //configuracion de cada tabla
+
+        //Usuarios
+        modelBuilder.Entity<Usuarios>()
+            .HasKey(u => u.IdUsuario);
 
         //Paises
         modelBuilder.Entity<Pais>()
@@ -93,10 +99,5 @@ public class VentasDbContext : DbContext
             .HasOne(f => f.Venta)
             .WithMany(u => u.Facturas)
             .HasForeignKey(f => f.IdUsuario);
-
-
-            //Uusuarios
-        modelBuilder.Entity<Usuarios>()
-            .HasKey(u => u.IdUsuario);
     }
 }

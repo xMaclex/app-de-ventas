@@ -169,7 +169,7 @@ namespace ventaapp.Controllers
         }
 
         // GET: Facturas/GestionNCF
-        public async Task<IActionResult> GestionNCF()
+        public IActionResult GestionNCF()
         {
             // Por ahora retorna vista vacía
             // En implementación completa, aquí se gestionarían las secuencias de NCF

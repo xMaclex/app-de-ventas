@@ -1,0 +1,88 @@
+@using System.Security.Claims
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    var nombreCompleto = User.FindFirst(ClaimTypes.GivenName)?.Value ?? "Usuario";
+    var rol = User.FindFirst(ClaimTypes.Role)?.Value ?? "Sin Rol";
+    var username = User.Identity.Name ?? "Usuario";
+
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i> @nombreCompleto
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li>
+                <div class="dropdown-header">
+                    <div><strong>@nombreCompleto</strong></div>
+                    <div class="text-muted small">@@@username</div>
+                    <div class="text-muted small"><i class="bi bi-award-fill"></i> @rol</div>
+                </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            @if (User.IsInRole("Administrador"))
+            {
+                <li>
+                    <a class="dropdown-item" asp-controller="Usuarios" asp-action="Index">
+                        <i class="bi bi-people-fill"></i> Gestionar Usuario
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+            }
+            <li>
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Auth" asp-action="Login">
+            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Auth" asp-action="Register">
+            <i class="bi bi-person-plus"></i> Registrarse
+        </a>
+    </li>
+}
+
+<style>
+    .dropdown-header {
+        padding: 10px 20px;
+    }
+    
+    .dropdown-header strong {
+        font-size: 15px;
+        color: #333;
+    }
+    
+    .dropdown-item {
+        padding: 10px 20px;
+        transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+        padding-left: 25px;
+    }
+    
+    .dropdown-item i {
+        width: 20px;
+        margin-right: 10px;
+    }
+    
+    #userDropdown {
+        font-weight: 500;
+    }
+    
+    #userDropdown i {
+        font-size: 18px;
+        margin-right: 5px;
+    }
+</style>

@@ -1,0 +1,308 @@
+@model ventaapp.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Registrarse";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - VentaApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .register-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            color: white;
+            text-align: center;
+        }
+
+        .register-header i {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .register-header h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .register-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .register-body {
+            padding: 50px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .form-section h4 {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            height: 48px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 0 15px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-register {
+            width: 100%;
+            height: 55px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-back {
+            width: 100%;
+            height: 50px;
+            background: #6c757d;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+
+        .login-link {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        @@media (max-width: 768px) {
+            .register-body {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="register-container">
+            <div class="register-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Crear Nueva Cuenta</h2>
+                <p>Completa el formulario para registrarte en VentaApp</p>
+            </div>
+
+            <div class="register-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Información Personal -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-user me-2"></i>Información Personal</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Nombre" class="required-field"></label>
+                                    <input asp-for="Nombre" class="form-control" placeholder="Ej: Juan" />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Apellidos" class="required-field"></label>
+                                    <input asp-for="Apellidos" class="form-control" placeholder="Ej: Pérez García" />
+                                    <span asp-validation-for="Apellidos" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Identificación -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-id-card me-2"></i>Identificación</h4>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="TipoDocumento" class="required-field"></label>
+                                    <select asp-for="TipoDocumento" class="form-control">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="Cédula">Cédula</option>
+                                        <option value="Pasaporte">Pasaporte</option>
+                                        <option value="RNC">RNC</option>
+                                    </select>
+                                    <span asp-validation-for="TipoDocumento" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label asp-for="NumeroDocumento" class="required-field"></label>
+                                    <input asp-for="NumeroDocumento" class="form-control" placeholder="Ej: 001-1234567-8" />
+                                    <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-phone me-2"></i>Información de Contacto</h4>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="NumeroTelefono"></label>
+                                    <input asp-for="NumeroTelefono" class="form-control" placeholder="809-555-1234" />
+                                    <span asp-validation-for="NumeroTelefono" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="NumeroCelular" class="required-field"></label>
+                                    <input asp-for="NumeroCelular" class="form-control" placeholder="829-555-5678" />
+                                    <span asp-validation-for="NumeroCelular" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Email" class="required-field"></label>
+                                    <input asp-for="Email" class="form-control" placeholder="correo@ejemplo.com" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credenciales -->
+                    <div class="form-section">
+                        <h4><i class="fas fa-lock me-2"></i>Credenciales de Acceso</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Username" class="required-field"></label>
+                                    <input asp-for="Username" class="form-control" placeholder="Nombre de usuario único" />
+                                    <span asp-validation-for="Username" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Password" class="required-field"></label>
+                                    <input asp-for="Password" class="form-control" placeholder="Mínimo 6 caracteres" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ConfirmPassword" class="required-field"></label>
+                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Repite la contraseña" />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rol (oculto - por defecto Vendedor) -->
+                  <!--  <input type="hidden" asp-for="Rol" value="Vendedor" /> -->
+
+                    <button type="submit" class="btn btn-register">
+                        <i class="fas fa-user-check me-2"></i> Registrarse
+                    </button>
+
+                    <a asp-action="Login" class="btn btn-back">
+                        <i class="fas fa-arrow-left me-2"></i> Volver al Login
+                    </a>
+
+                    <div class="login-link">
+                        ¿Ya tienes una cuenta? <a asp-action="Login">Inicia sesión aquí</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

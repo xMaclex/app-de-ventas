@@ -220,3 +220,5 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ref/ventaapp.dll
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/bmw8043fiy-ofgk83r4zq.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/dns86pujlt-ofgk83r4zq.gz
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/bin/Debug/net9.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/bin/Debug/net9.0/BCrypt.Net-Next.dll
