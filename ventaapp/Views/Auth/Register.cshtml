@@ -158,6 +158,17 @@
             color: #dc3545;
         }
 
+        #preview-nueva 
+        {
+            display: none;
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #4f8ef7;
+            box-shadow: 0 2px 8px rgba(79,142,247,.2);
+        }
+
         @@media (max-width: 768px) {
             .register-body {
                 padding: 30px 20px;
@@ -175,8 +186,28 @@
             </div>
 
             <div class="register-body">
-                <form asp-action="Register" method="post">
+                <form asp-action="Register" method="post" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+
+                    <!-- subida de imagen-->
+                        <div class="form-section">
+                            <h4><i class="bi bi-image me-2"></i>Foto de Perfil</h4>
+                            <div class="form-group">
+                                <input asp-for="FotoPerfil" type="file" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp" />
+                                <span asp-validation-for="FotoPerfil" class="text-danger"></span>
+                            </div>
+                        </div>
+
+
+                        <!-- Preview de nueva imagen seleccionada -->
+                    <div id="contenedor-preview" class="mt-2" style="display:none;">
+                        <p class="text-muted mb-1" style="font-size:.78rem;">Nueva foto seleccionada:</p>
+                        <img id="preview-nueva" alt="Vista previa" />
+                        <div class="mt-1">
+                            <small id="nombre-archivo" class="text-muted"></small>
+                        </div>
+                    </div>
 
                     <!-- Información Personal -->
                     <div class="form-section">
@@ -218,7 +249,7 @@
                             <div class="col-md-8">
                                 <div class="form-group">
                                     <label asp-for="NumeroDocumento" class="required-field"></label>
-                                    <input asp-for="NumeroDocumento" class="form-control" placeholder="Ej: 001-1234567-8" />
+                                    <input asp-for="NumeroDocumento" class="form-control" placeholder="Número de documento" />
                                     <span asp-validation-for="NumeroDocumento" class="text-danger"></span>
                                 </div>
                             </div>

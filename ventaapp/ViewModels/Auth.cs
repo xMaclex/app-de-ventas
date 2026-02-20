@@ -74,5 +74,8 @@ namespace ventaapp.ViewModels
 
         /*[Display(Name = "Roles")]
         public int Roles { get; set; } */
+
+        [Display(Name = "Foto de Perfil")]
+        public IFormFile? FotoPerfil { get; set; }
     }
 }

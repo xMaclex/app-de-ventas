@@ -171,6 +171,17 @@ namespace ventaapp.Controllers
 
             try
             {
+                //valida la foto de perfil
+                byte[]? fotoPerfilBytes = null;
+                if (model.FotoPerfil != null)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.FotoPerfil.CopyToAsync(memoryStream);
+                            fotoPerfilBytes = memoryStream.ToArray();
+                    }
+                }
+
                 // Verificar si el username ya existe
                 if (await _context.Usuario.AnyAsync(u => u.Username == model.Username))
                 {
@@ -207,14 +218,16 @@ namespace ventaapp.Controllers
                     Estado = "Activo",
                                             // Por defecto todos los nuevos usuarios son vendedores
                     FechaRegistro = DateTime.Now,
-                    IntentosFallidos = 0
+                    IntentosFallidos = 0,
+                    FotoPerfil = fotoPerfilBytes,
+                    
                 };
 
                 _context.Usuario.Add(nuevoUsuario);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Registro exitoso. Por favor inicie sesión.";
-                return RedirectToAction(nameof(Login));
+                return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
@@ -222,15 +235,22 @@ namespace ventaapp.Controllers
                 return View(model);
             }
         }
-
+        
         // GET: Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction(nameof(Login));
         }
+            public IActionResult Index()
+            {
+                return RedirectToAction(nameof(Login));
+            }
 
         // GET: Account/AccessDenied
         [HttpGet]

@@ -124,6 +124,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Usuarios/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXN1YXJpb3MvRGVsZXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Usuarios/Editar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXN1YXJpb3MvRWRpdGFyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Usuarios/index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXN1YXJpb3MvaW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ventas/CierreCaja.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVmVudGFzL0NpZXJyZUNhamEuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
