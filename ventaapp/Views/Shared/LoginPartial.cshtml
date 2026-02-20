@@ -1,4 +1,5 @@
 @using System.Security.Claims
+@using System.Diagnostics.Eventing.Reader
 
 @if (User.Identity != null && User.Identity.IsAuthenticated)
 {
@@ -40,16 +41,14 @@
 }
 else
 {
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Auth" asp-action="Login">
-            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-        </a>
+    <li>
+        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="dropdown-item text-danger">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </button>
+        </form>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Auth" asp-action="Register">
-            <i class="bi bi-person-plus"></i> Registrarse
-        </a>
-    </li>
+
 }
 
 <style>
@@ -86,3 +85,6 @@ else
         margin-right: 5px;
     }
 </style>
+
+
+

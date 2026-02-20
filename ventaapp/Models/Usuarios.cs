@@ -90,6 +90,9 @@ namespace ventaapp.Models
         [Column("bloqueado_hasta")]
         public DateTime? BloqueadoHasta { get; set; }
 
+        [Column("foto_perfil")]
+        public byte[]? FotoPerfil { get; set; }
+
         // Propiedades calculadas
         [NotMapped]
         public string NombreCompleto => $"{Nombre} {Apellidos}";
