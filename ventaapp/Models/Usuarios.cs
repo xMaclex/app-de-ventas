@@ -73,8 +73,8 @@ namespace ventaapp.Models
 
         [Required(ErrorMessage = "Rol obligatorio")]
         [StringLength(20)]
-        [Column("rol")]
-        public string Rol { get; set; } = "Vendedor";
+        [Column("id_roles")]
+        public int IdRoles { get; set; }
 
         [Display(Name = "Fecha de Registro")]
         [Column("fecha_registro")]
@@ -104,5 +104,8 @@ namespace ventaapp.Models
         // Relaciones entre tablas
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+
+        //[ForeignKey("id_roles")]
+       // public Roles? Roles{ get; set; }
     }
 }

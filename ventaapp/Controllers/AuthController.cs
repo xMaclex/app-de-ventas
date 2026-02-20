@@ -115,7 +115,6 @@ namespace ventaapp.Controllers
                     new Claim(ClaimTypes.Name, usuario.Username),
                     new Claim(ClaimTypes.Email, usuario.Email),
                     new Claim(ClaimTypes.GivenName, usuario.NombreCompleto),
-                    new Claim(ClaimTypes.Role, usuario.Rol)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -206,7 +205,7 @@ namespace ventaapp.Controllers
                     Email = model.Email,
                     Clave = HashPassword(model.Password),
                     Estado = "Activo",
-                    Rol = "Vendedor", // Por defecto todos los nuevos usuarios son vendedores
+                                            // Por defecto todos los nuevos usuarios son vendedores
                     FechaRegistro = DateTime.Now,
                     IntentosFallidos = 0
                 };

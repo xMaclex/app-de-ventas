@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ventaapp.ViewModels
 {
@@ -38,7 +39,7 @@ namespace ventaapp.ViewModels
         [Display(Name = "Número de Documento")]
         public string NumeroDocumento { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El número de teléfono es obligatorio")]
+        [Required(ErrorMessage = "El nombre de usuario es obligatorio")]
         [StringLength(20, ErrorMessage = "El número de teléfono no puede exceder 20 caracteres")]
         [Display(Name = "Teléfono")]
         public string NumeroTelefono { get; set; } = string.Empty;
@@ -71,7 +72,7 @@ namespace ventaapp.ViewModels
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Display(Name = "Rol")]
-        public string Rol { get; set; } = "Vendedor";
+        /*[Display(Name = "Roles")]
+        public int Roles { get; set; } */
     }
 }
