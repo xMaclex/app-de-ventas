@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using ventaapp.Models;
 
 namespace ventaapp.Data;
 
-public class VentasDbContext : DbContext
+public class VentasDbContext : IdentityDbContext<ApplicationUser>
 {
     public VentasDbContext(DbContextOptions<VentasDbContext> options) : base(options)
     {
@@ -15,6 +17,7 @@ public class VentasDbContext : DbContext
         public DbSet<Pais> Paises { get; set; }
         public DbSet<Ciudad> Ciudades { get; set; }
         public DbSet<Usuarios> Usuario { get; set; }
+       // public DbSet<Roles> Roles { get; set; }
 
 
 
@@ -22,7 +25,17 @@ public class VentasDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+
         //configuracion de cada tabla
+
+        //Usuarios
+        modelBuilder.Entity<Usuarios>()
+            .HasKey(u => u.IdUsuario);
+
+       /* modelBuilder.Entity<Usuarios>()
+            .HasOne(u => u.Roles)
+            .WithMany(r => r.Usuarios)
+            .HasForeignKey(u => u.IdRoles); */
 
         //Paises
         modelBuilder.Entity<Pais>()
@@ -38,7 +51,6 @@ public class VentasDbContext : DbContext
             .HasForeignKey(c => c.IdPais);
 
         //clientes
-
         modelBuilder.Entity<Clientes>()
             .HasKey(c => c.IdCliente);
 
@@ -94,9 +106,8 @@ public class VentasDbContext : DbContext
             .WithMany(u => u.Facturas)
             .HasForeignKey(f => f.IdUsuario);
 
-
-            //Uusuarios
-        modelBuilder.Entity<Usuarios>()
-            .HasKey(u => u.IdUsuario);
+        //Roles
+       // modelBuilder.Entity<Roles>()
+            //.HasKey(r => r.IdRoles);
     }
 }

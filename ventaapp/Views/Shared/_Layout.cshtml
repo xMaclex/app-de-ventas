@@ -23,6 +23,7 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarScroll">
                 <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+                        
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
                             <i class="bi bi-house"></i> Inicio
@@ -72,10 +73,10 @@
                             <i class="bi bi-gear"></i> Configuracion
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" asp-controller="Productos" asp-action="Index">
+                            <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="#">
                                 <i class="bi bi-list"></i> Usuarios
                             </a></li>
-                            <li><a class="dropdown-item" asp-controller="Productos" asp-action="Create">
+                            <li><a class="dropdown-item" asp-controller="Ajustes" asp-action="#">
                                 <i class="bi bi-plus-circle"></i> Ajustes
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -87,6 +88,11 @@
                     
 >>>>>>> develop
                 </ul>
+
+                    <ul class="navbar-nav ms-auto">
+                        <partial name="LoginPartial" />
+                    </ul>
+
                 <form class="d-flex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Search"/>
                     <button class="btn btn-outline-success" type="submit">
@@ -96,7 +102,6 @@
             </div>
         </nav> 
     </header>
-    
     <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()

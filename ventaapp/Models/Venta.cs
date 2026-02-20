@@ -86,7 +86,6 @@ namespace ventaapp.Models
         public string Notas { get; set; } = string.Empty;
 
         [Display(Name = "Usuario: ")]
-        [StringLength(100)]
         [Column("id_usuarios")]
         public int IdUsuario { get; set; }
 
