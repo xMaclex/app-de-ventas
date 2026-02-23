@@ -1,0 +1,921 @@
+@{
+    ViewData["Title"] = "Personalización del Sistema";
+}
+
+<style>
+    /* ── Variables de diseño del editor ──────────────────────────── */
+    :root {
+        --editor-bg: #f0f4fb;
+        --card-bg: #ffffff;
+        --text-main: #1a202c;
+        --text-muted: #718096;
+        --border: #e2e8f0;
+        --shadow: 0 4px 24px rgba(79,142,247,.10);
+    }
+
+    body { background: var(--editor-bg); }
+
+    .editor-wrapper {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+    .editor-header { margin-bottom: 2rem; }
+    .editor-header h2 {
+        font-size: 1.9rem; font-weight: 800;
+        color: var(--text-main); letter-spacing: -.5px;
+    }
+    .editor-header p { color: var(--text-muted); font-size: .95rem; }
+
+    .editor-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    @@media (max-width: 960px) { .editor-grid { grid-template-columns: 1fr; } }
+
+    .card-panel {
+        background: var(--card-bg);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 1.6rem;
+        margin-bottom: 1.2rem;
+    }
+    .panel-title {
+        font-size: .72rem; font-weight: 800; letter-spacing: .12em;
+        text-transform: uppercase; color: var(--text-muted);
+        margin-bottom: 1.2rem;
+        display: flex; align-items: center; gap: .5rem;
+    }
+    .panel-title i { font-size: 1rem; }
+
+    /* Presets */
+    .preset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+        gap: .7rem;
+    }
+    .preset-card {
+        border-radius: 14px; overflow: hidden; cursor: pointer;
+        border: 3px solid transparent; transition: all .2s ease; position: relative;
+    }
+    .preset-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.13); }
+    .preset-card.active { border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,.25); }
+    .preset-bar { height: 48px; display: flex; }
+    .preset-bar span { flex: 1; }
+    .preset-name { font-size: .75rem; font-weight: 700; color: var(--text-main); padding: .45rem .7rem .55rem; background: #f8fafc; display: block; }
+    .preset-card.active::after {
+        content: '✓'; position: absolute; top: 6px; right: 8px;
+        background: #4f8ef7; color: #fff; border-radius: 50%;
+        width: 20px; height: 20px; font-size: .7rem; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Color rows */
+    .color-row {
+        display: flex; align-items: center; gap: 1rem;
+        padding: .7rem 0; border-bottom: 1px solid var(--border);
+    }
+    .color-row:last-child { border-bottom: none; }
+    .color-swatch {
+        width: 44px; height: 44px; border-radius: 10px;
+        border: none; cursor: pointer; padding: 0; overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,.12); flex-shrink: 0; transition: transform .15s;
+    }
+    .color-swatch:hover { transform: scale(1.1); }
+    .color-swatch::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-swatch::-webkit-color-swatch { border: none; border-radius: 10px; }
+    .color-label { flex: 1; }
+    .color-label strong { display: block; font-size: .87rem; font-weight: 700; color: var(--text-main); }
+    .color-label small { color: var(--text-muted); font-size: .76rem; }
+    .hex-input {
+        width: 100px; font-size: .82rem; font-family: 'Courier New', monospace;
+        border: 1.5px solid var(--border); border-radius: 8px;
+        padding: .35rem .6rem; color: var(--text-main);
+        text-transform: uppercase; transition: border-color .2s;
+    }
+    .hex-input:focus { border-color: #4f8ef7; outline: none; }
+
+    /* Preview navbar */
+    .navbar-preview-wrap { border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.12); margin-bottom: 1rem; }
+    .nav-preview { display: flex; align-items: center; padding: .7rem 1.2rem; gap: 1rem; transition: background .3s; }
+    .nav-preview-brand { font-weight: 800; font-size: .95rem; display: flex; align-items: center; gap: .4rem; transition: color .3s; }
+    .nav-preview-links { display: flex; gap: .3rem; flex: 1; }
+    .nav-preview-link { font-size: .78rem; font-weight: 600; padding: .3rem .7rem; border-radius: 8px; cursor: default; transition: background .2s, color .2s; }
+    .nav-preview-user { font-size: .78rem; font-weight: 600; padding: .3rem .7rem; border-radius: 8px; display: flex; align-items: center; gap: .4rem; }
+
+    /* Preview página completa */
+    .page-preview-full {
+        padding: 1rem 1.2rem;
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        gap: .7rem;
+    }
+    .prev-row { display: flex; gap: .6rem; align-items: center; }
+    .prev-btn { height: 28px; border-radius: 6px; font-size: .72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 .9rem; transition: background .3s, color .3s; }
+    .prev-btn-outline { background: transparent; border: 2px solid; }
+    .prev-badge { height: 20px; border-radius: 20px; font-size: .65rem; font-weight: 700; display: flex; align-items: center; padding: 0 .7rem; transition: background .3s, color .3s; }
+    .prev-card { background: #fff; border-radius: 10px; padding: .7rem 1rem; box-shadow: 0 2px 10px rgba(0,0,0,.07); flex: 1; }
+    .prev-card-header { height: 10px; border-radius: 5px; margin-bottom: .5rem; transition: background .3s; }
+    .prev-bar { height: 7px; border-radius: 4px; margin-bottom: .35rem; background: #e2e8f0; }
+    .prev-bar.accent { background: #4f8ef7; width: 60%; }
+    .prev-progress { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; flex: 1; }
+    .prev-progress-fill { height: 100%; border-radius: 4px; width: 65%; transition: background .3s; }
+    .prev-link { font-size: .72rem; font-weight: 700; text-decoration: underline; cursor: default; transition: color .3s; }
+
+    /* Botones de acción */
+    .btn-apply {
+        width: 100%; padding: .85rem; border-radius: 12px; font-weight: 700;
+        font-size: .95rem; border: none; cursor: pointer; transition: all .2s;
+        display: flex; align-items: center; justify-content: center; gap: .5rem; margin-bottom: .6rem;
+    }
+    .btn-apply-primary { background: linear-gradient(135deg, #4f8ef7, #764ba2); color: #fff; box-shadow: 0 4px 16px rgba(79,142,247,.35); }
+    .btn-apply-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,142,247,.45); }
+    .btn-apply-reset { background: #f1f5f9; color: #64748b; border: 1.5px solid var(--border); }
+    .btn-apply-reset:hover { background: #e2e8f0; }
+
+    /* Slider */
+    .slider-wrap { display: flex; align-items: center; gap: .8rem; }
+    input[type=range] { flex: 1; -webkit-appearance: none; height: 5px; border-radius: 3px; background: var(--border); outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #4f8ef7; cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(79,142,247,.4); }
+
+    /* Toast */
+    .toast-msg {
+        position: fixed; bottom: 2rem; right: 2rem;
+        background: #1a202c; color: #fff; padding: .85rem 1.4rem;
+        border-radius: 14px; font-size: .88rem; font-weight: 600;
+        box-shadow: 0 8px 32px rgba(0,0,0,.25);
+        display: flex; align-items: center; gap: .6rem;
+        z-index: 9999; transform: translateY(80px); opacity: 0;
+        transition: all .35s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
+    }
+    .toast-msg.show { transform: translateY(0); opacity: 1; }
+
+    /* Tabs de sección de colores */
+    .color-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .color-tab {
+        font-size: .75rem; font-weight: 700; padding: .35rem .85rem;
+        border-radius: 20px; border: 2px solid var(--border);
+        background: #f8fafc; color: var(--text-muted); cursor: pointer; transition: all .2s;
+    }
+    .color-tab.active { background: #4f8ef7; color: #fff; border-color: #4f8ef7; }
+    .color-section { display: none; }
+    .color-section.active { display: block; }
+</style>
+
+<div class="editor-wrapper">
+
+    <div class="editor-header">
+        <h2><i class="bi bi-palette2" style="color:#4f8ef7;"></i> Personalización del Sistema</h2>
+        <p>Modifica los colores del menú, botones, cards, badges y toda la interfaz. Los cambios se aplican al instante en todo el sistema.</p>
+    </div>
+
+    <div class="editor-grid">
+
+        <!-- ── Columna izquierda ───────────────────── -->
+        <div>
+
+            <!-- Presets -->
+            <div class="card-panel">
+                <div class="panel-title"><i class="bi bi-stars"></i> Paletas Predefinidas</div>
+                <div class="preset-grid" id="presetGrid"></div>
+            </div>
+
+            <!-- Colores por sección -->
+            <div class="card-panel">
+                <div class="panel-title"><i class="bi bi-sliders"></i> Colores Avanzados</div>
+
+                <div class="color-tabs">
+                    <div class="color-tab active" onclick="showTab('tab-nav', this)">🗂 Menú</div>
+                    <div class="color-tab" onclick="showTab('tab-btns', this)">🔘 Botones</div>
+                    <div class="color-tab" onclick="showTab('tab-ui', this)">🎨 Interfaz</div>
+                    <div class="color-tab" onclick="showTab('tab-text', this)">✏️ Tipografía</div>
+                </div>
+
+                <!-- TAB: MENÚ -->
+                <div class="color-section active" id="tab-nav">
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrNavBg" />
+                        <div class="color-label"><strong>Fondo del Menú</strong><small>Color principal del navbar</small></div>
+                        <input type="text" class="hex-input" id="hexNavBg" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrNavText" />
+                        <div class="color-label"><strong>Texto del Menú</strong><small>Links y íconos del navbar</small></div>
+                        <input type="text" class="hex-input" id="hexNavText" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrNavBrand" />
+                        <div class="color-label"><strong>Color del Logo</strong><small>Nombre VentaApp</small></div>
+                        <input type="text" class="hex-input" id="hexNavBrand" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrDropBg" />
+                        <div class="color-label"><strong>Fondo Dropdown</strong><small>Menús desplegables</small></div>
+                        <input type="text" class="hex-input" id="hexDropBg" maxlength="7" />
+                    </div>
+                    <div class="color-row" style="border-bottom:none; padding-bottom:0;">
+                        <div style="flex:1;"><strong style="font-size:.87rem;font-weight:700;color:var(--text-main);">Opacidad del fondo</strong><br><small style="color:var(--text-muted);font-size:.76rem;">Efecto glassmorphism</small></div>
+                        <div class="slider-wrap" style="width:180px;">
+                            <input type="range" id="sliderOpacity" min="70" max="100" value="100" />
+                            <span id="opacityVal" style="font-size:.82rem;font-weight:700;color:#4f8ef7;width:36px;">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: BOTONES -->
+                <div class="color-section" id="tab-btns">
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrPrimary" />
+                        <div class="color-label"><strong>Color Primario</strong><small>btn-primary, encabezados azules</small></div>
+                        <input type="text" class="hex-input" id="hexPrimary" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrAccent" />
+                        <div class="color-label"><strong>Color Acento</strong><small>Hover, links activos, highlights</small></div>
+                        <input type="text" class="hex-input" id="hexAccent" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrSuccess" />
+                        <div class="color-label"><strong>Éxito / Verde</strong><small>btn-success, badges verdes</small></div>
+                        <input type="text" class="hex-input" id="hexSuccess" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrDanger" />
+                        <div class="color-label"><strong>Peligro / Rojo</strong><small>btn-danger, alertas</small></div>
+                        <input type="text" class="hex-input" id="hexDanger" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrWarning" />
+                        <div class="color-label"><strong>Advertencia / Amarillo</strong><small>btn-warning, estados</small></div>
+                        <input type="text" class="hex-input" id="hexWarning" maxlength="7" />
+                    </div>
+                    <div class="color-row" style="border-bottom:none;">
+                        <input type="color" class="color-swatch" id="clrInfo" />
+                        <div class="color-label"><strong>Información / Celeste</strong><small>btn-info, badges info</small></div>
+                        <input type="text" class="hex-input" id="hexInfo" maxlength="7" />
+                    </div>
+                </div>
+
+                <!-- TAB: INTERFAZ -->
+                <div class="color-section" id="tab-ui">
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrPageBg" />
+                        <div class="color-label"><strong>Fondo de Página</strong><small>Color del body / fondo general</small></div>
+                        <input type="text" class="hex-input" id="hexPageBg" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrCardBg" />
+                        <div class="color-label"><strong>Fondo de Cards</strong><small>Tarjetas y paneles</small></div>
+                        <input type="text" class="hex-input" id="hexCardBg" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrTableHead" />
+                        <div class="color-label"><strong>Encabezado de Tablas</strong><small>thead de todas las tablas</small></div>
+                        <input type="text" class="hex-input" id="hexTableHead" maxlength="7" />
+                    </div>
+                    <div class="color-row" style="border-bottom:none;">
+                        <input type="color" class="color-swatch" id="clrBorder" />
+                        <div class="color-label"><strong>Color de Bordes</strong><small>Divisores y bordes de inputs</small></div>
+                        <input type="text" class="hex-input" id="hexBorder" maxlength="7" />
+                    </div>
+                </div>
+
+                <!-- TAB: TIPOGRAFÍA -->
+                <div class="color-section" id="tab-text">
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrTextMain" />
+                        <div class="color-label"><strong>Texto Principal</strong><small>Títulos y texto general</small></div>
+                        <input type="text" class="hex-input" id="hexTextMain" maxlength="7" />
+                    </div>
+                    <div class="color-row">
+                        <input type="color" class="color-swatch" id="clrTextMuted" />
+                        <div class="color-label"><strong>Texto Secundario</strong><small>Subtítulos, descripciones</small></div>
+                        <input type="text" class="hex-input" id="hexTextMuted" maxlength="7" />
+                    </div>
+                    <div class="color-row" style="border-bottom:none;">
+                        <input type="color" class="color-swatch" id="clrLink" />
+                        <div class="color-label"><strong>Color de Links</strong><small>Anchors y enlaces</small></div>
+                        <input type="text" class="hex-input" id="hexLink" maxlength="7" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Columna derecha ─────────────────────── -->
+        <div>
+
+            <!-- Preview completo -->
+            <div class="card-panel" style="padding:1.2rem;">
+                <div class="panel-title"><i class="bi bi-eye"></i> Vista Previa Completa</div>
+
+                <div class="navbar-preview-wrap">
+                    <!-- Navbar preview -->
+                    <div class="nav-preview" id="navPreview">
+                        <div class="nav-preview-brand" id="prevBrand"><i class="bi bi-shop"></i> VentaApp</div>
+                        <div class="nav-preview-links">
+                            <div class="nav-preview-link" id="prevLink1">Inicio</div>
+                            <div class="nav-preview-link" id="prevLink2">Clientes</div>
+                            <div class="nav-preview-link" id="prevLink3">Ventas</div>
+                        </div>
+                        <div class="nav-preview-user" id="prevUser"><i class="bi bi-person-circle"></i></div>
+                    </div>
+
+                    <!-- Page preview -->
+                    <div class="page-preview-full" id="pagePreview">
+                        <!-- Fila de botones -->
+                        <div class="prev-row">
+                            <div class="prev-btn" id="prevBtnPrimary">Guardar</div>
+                            <div class="prev-btn" id="prevBtnSuccess">Nuevo</div>
+                            <div class="prev-btn" id="prevBtnDanger">Eliminar</div>
+                            <div class="prev-btn" id="prevBtnWarning">Editar</div>
+                        </div>
+                        <!-- Fila de badges -->
+                        <div class="prev-row">
+                            <div class="prev-badge" id="prevBadgePrimary">Activo</div>
+                            <div class="prev-badge" id="prevBadgeSuccess">Completada</div>
+                            <div class="prev-badge" id="prevBadgeDanger">Anulada</div>
+                            <div class="prev-badge" id="prevBadgeInfo">Información</div>
+                            <div class="prev-link" id="prevLink">ver detalles →</div>
+                        </div>
+                        <!-- Cards mini -->
+                        <div class="prev-row" style="align-items:stretch;">
+                            <div class="prev-card" style="flex:1;">
+                                <div class="prev-card-header" id="prevCardH1"></div>
+                                <div class="prev-bar" style="width:80%;"></div>
+                                <div class="prev-bar" style="width:55%;"></div>
+                            </div>
+                            <div class="prev-card" style="flex:1;">
+                                <div class="prev-card-header" id="prevCardH2"></div>
+                                <div class="prev-bar" style="width:70%;"></div>
+                                <div class="prev-bar" style="width:40%;"></div>
+                            </div>
+                        </div>
+                        <!-- Progress + tabla mini -->
+                        <div class="prev-row">
+                            <div style="flex:1; font-size:.7rem; font-weight:600;" id="prevTableLabel">Ventas</div>
+                            <div class="prev-progress" style="flex:3;">
+                                <div class="prev-progress-fill" id="prevProgressFill"></div>
+                            </div>
+                            <div style="font-size:.7rem; font-weight:700;" id="prevTableValue">65%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <small style="color:var(--text-muted);font-size:.74rem;display:block;text-align:center;margin-top:.3rem;">
+                    <i class="bi bi-info-circle"></i> Previsualización de toda la interfaz
+                </small>
+            </div>
+
+            <!-- Acciones -->
+            <div class="card-panel" style="padding:1.2rem;">
+                <div class="panel-title"><i class="bi bi-floppy2"></i> Guardar Cambios</div>
+                <button class="btn-apply btn-apply-primary" onclick="aplicarYGuardar()">
+                    <i class="bi bi-check2-circle"></i> Aplicar y Guardar en Todo el Sistema
+                </button>
+                <button class="btn-apply btn-apply-reset" onclick="resetearColores()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Restaurar Predeterminado
+                </button>
+                <div style="margin-top:1rem;padding:.9rem;background:#f8fafc;border-radius:10px;border:1px solid var(--border);">
+                    <small style="color:var(--text-muted);font-size:.76rem;line-height:1.6;">
+                        <i class="bi bi-shield-check" style="color:#4f8ef7;"></i>
+                        Los cambios se aplican automáticamente en <strong>todas las páginas</strong> del sistema: menú, botones, cards, tablas, badges, modales y más.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Código exportable -->
+            <div class="card-panel" style="padding:1.2rem;">
+                <div class="panel-title"><i class="bi bi-code-square"></i> Código de Paleta</div>
+                <textarea id="codigoPaleta" readonly style="width:100%;height:90px;font-family:'Courier New',monospace;font-size:.72rem;border:1.5px solid var(--border);border-radius:10px;padding:.6rem;color:var(--text-main);background:#f8fafc;resize:none;outline:none;line-height:1.7;"></textarea>
+                <button onclick="copiarCodigo()" style="margin-top:.5rem;width:100%;padding:.5rem;border-radius:8px;border:1.5px solid var(--border);background:#f1f5f9;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--text-muted);">
+                    <i class="bi bi-clipboard"></i> Copiar código de paleta
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast-msg" id="toastMsg">
+    <i class="bi bi-check-circle-fill" style="color:#4ade80;"></i>
+    <span id="toastText">¡Cambios aplicados!</span>
+</div>
+
+@section Scripts {
+<script>
+/* ===================================================
+   PALETAS PREDEFINIDAS (incluyen TODOS los colores)
+=================================================== */
+const PRESETS = [
+    {
+        name:'Océano Profundo', navBg:'#0a1628', navText:'#e8f4fd', navBrand:'#60c3ff', dropBg:'#0d1f3c',
+        primary:'#3b9ded', accent:'#60c3ff', success:'#10b981', danger:'#ef4444', warning:'#f59e0b', info:'#06b6d4',
+        pageBg:'#f0f7ff', cardBg:'#ffffff', tableHead:'#0a1628', border:'#bfdbfe',
+        textMain:'#0f172a', textMuted:'#475569', link:'#3b9ded', opacity:100
+    },
+    {
+        name:'Medianoche', navBg:'#1a1a2e', navText:'#e0e0ff', navBrand:'#a78bfa', dropBg:'#16213e',
+        primary:'#7c3aed', accent:'#a78bfa', success:'#059669', danger:'#dc2626', warning:'#d97706', info:'#0891b2',
+        pageBg:'#f5f3ff', cardBg:'#ffffff', tableHead:'#1a1a2e', border:'#ddd6fe',
+        textMain:'#1e1b4b', textMuted:'#6d28d9', link:'#7c3aed', opacity:100
+    },
+    {
+        name:'Bosque Verde', navBg:'#1b2e1f', navText:'#d4edda', navBrand:'#86efac', dropBg:'#1e3a22',
+        primary:'#16a34a', accent:'#22c55e', success:'#15803d', danger:'#dc2626', warning:'#ca8a04', info:'#0284c7',
+        pageBg:'#f0fdf4', cardBg:'#ffffff', tableHead:'#1b2e1f', border:'#bbf7d0',
+        textMain:'#14532d', textMuted:'#166534', link:'#16a34a', opacity:100
+    },
+    {
+        name:'Carbón', navBg:'#18181b', navText:'#f4f4f5', navBrand:'#fdba74', dropBg:'#27272a',
+        primary:'#f97316', accent:'#fb923c', success:'#22c55e', danger:'#ef4444', warning:'#eab308', info:'#06b6d4',
+        pageBg:'#fafafa', cardBg:'#ffffff', tableHead:'#18181b', border:'#e4e4e7',
+        textMain:'#09090b', textMuted:'#71717a', link:'#f97316', opacity:100
+    },
+    {
+        name:'Zafiro', navBg:'#1e3a5f', navText:'#dbeafe', navBrand:'#93c5fd', dropBg:'#1e3a8a',
+        primary:'#2563eb', accent:'#60a5fa', success:'#059669', danger:'#dc2626', warning:'#d97706', info:'#0891b2',
+        pageBg:'#eff6ff', cardBg:'#ffffff', tableHead:'#1e3a5f', border:'#bfdbfe',
+        textMain:'#1e3a5f', textMuted:'#3b82f6', link:'#2563eb', opacity:100
+    },
+    {
+        name:'Granate', navBg:'#2d1515', navText:'#fce7e7', navBrand:'#fca5a5', dropBg:'#3d1515',
+        primary:'#dc2626', accent:'#ef4444', success:'#16a34a', danger:'#991b1b', warning:'#d97706', info:'#0891b2',
+        pageBg:'#fff5f5', cardBg:'#ffffff', tableHead:'#2d1515', border:'#fecaca',
+        textMain:'#7f1d1d', textMuted:'#b91c1c', link:'#dc2626', opacity:100
+    },
+    {
+        name:'Arena', navBg:'#f5f0e8', navText:'#3d2b1f', navBrand:'#92400e', dropBg:'#fef3c7',
+        primary:'#b45309', accent:'#d97706', success:'#15803d', danger:'#dc2626', warning:'#ca8a04', info:'#0369a1',
+        pageBg:'#fef9f0', cardBg:'#fffef9', tableHead:'#78350f', border:'#fde68a',
+        textMain:'#3d2b1f', textMuted:'#78350f', link:'#b45309', opacity:95
+    },
+    {
+        name:'Aurora', navBg:'#0f2027', navText:'#e0ffe8', navBrand:'#5fffda', dropBg:'#203a43',
+        primary:'#00b894', accent:'#00d4aa', success:'#00b894', danger:'#e17055', warning:'#fdcb6e', info:'#74b9ff',
+        pageBg:'#f0fff8', cardBg:'#ffffff', tableHead:'#0f2027', border:'#b2f5ea',
+        textMain:'#064e3b', textMuted:'#047857', link:'#00b894', opacity:100
+    },
+    {
+        name:'Violeta', navBg:'#2d1b69', navText:'#ede9fe', navBrand:'#c4b5fd', dropBg:'#3b1f8a',
+        primary:'#7c3aed', accent:'#a855f7', success:'#059669', danger:'#e11d48', warning:'#d97706', info:'#0891b2',
+        pageBg:'#faf5ff', cardBg:'#ffffff', tableHead:'#2d1b69', border:'#e9d5ff',
+        textMain:'#3b0764', textMuted:'#7e22ce', link:'#7c3aed', opacity:100
+    },
+    {
+        name:'Bronce', navBg:'#2c1810', navText:'#fdf0e0', navBrand:'#fbbf24', dropBg:'#3c2415',
+        primary:'#b45309', accent:'#d97706', success:'#15803d', danger:'#b91c1c', warning:'#92400e', info:'#075985',
+        pageBg:'#fffbeb', cardBg:'#fffff8', tableHead:'#2c1810', border:'#fde68a',
+        textMain:'#451a03', textMuted:'#78350f', link:'#b45309', opacity:100
+    },
+    {
+        name:'Hielo', navBg:'#e0f2fe', navText:'#0369a1', navBrand:'#0284c7', dropBg:'#f0f9ff',
+        primary:'#0284c7', accent:'#0ea5e9', success:'#059669', danger:'#dc2626', warning:'#d97706', info:'#0891b2',
+        pageBg:'#f8fcff', cardBg:'#ffffff', tableHead:'#bae6fd', border:'#bae6fd',
+        textMain:'#0c4a6e', textMuted:'#0369a1', link:'#0284c7', opacity:100
+    },
+    {
+        name:'Onyx', navBg:'#09090b', navText:'#fafafa', navBrand:'#a1a1aa', dropBg:'#18181b',
+        primary:'#52525b', accent:'#a1a1aa', success:'#22c55e', danger:'#ef4444', warning:'#eab308', info:'#38bdf8',
+        pageBg:'#f4f4f5', cardBg:'#ffffff', tableHead:'#09090b', border:'#d4d4d8',
+        textMain:'#09090b', textMuted:'#52525b', link:'#3f3f46', opacity:100
+    },
+];
+
+/* ===================================================
+   ESTADO
+=================================================== */
+const DEFAULT = {
+    navBg:'#212529', navText:'#ffffff', navBrand:'#ffffff', dropBg:'#ffffff',
+    primary:'#0d6efd', accent:'#0d6efd', success:'#198754', danger:'#dc3545', warning:'#ffc107', info:'#0dcaf0',
+    pageBg:'#f8f9fa', cardBg:'#ffffff', tableHead:'#212529', border:'#dee2e6',
+    textMain:'#212529', textMuted:'#6c757d', link:'#0d6efd', opacity:100
+};
+
+let current = Object.assign({}, DEFAULT);
+
+/* ===================================================
+   INIT
+=================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('ventaapp_palette_v2');
+    if (saved) { try { Object.assign(current, JSON.parse(saved)); } catch(e){} }
+    renderPresets();
+    bindAllControls();
+    syncAllInputs();
+    updatePreview();
+    updateCode();
+    aplicarAlDOM(current);
+});
+
+/* ===================================================
+   TABS
+=================================================== */
+function showTab(id, el) {
+    document.querySelectorAll('.color-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.color-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+}
+
+/* ===================================================
+   PRESETS
+=================================================== */
+function renderPresets() {
+    const grid = document.getElementById('presetGrid');
+    grid.innerHTML = '';
+    PRESETS.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'preset-card';
+        div.id = 'preset_' + i;
+        div.innerHTML = `<div class="preset-bar"><span style="background:${p.navBg}"></span><span style="background:${p.primary}"></span><span style="background:${p.accent}"></span></div><span class="preset-name">${p.name}</span>`;
+        div.addEventListener('click', () => {
+            Object.assign(current, p);
+            syncAllInputs();
+            updatePreview();
+            updateCode();
+            document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+            div.classList.add('active');
+        });
+        grid.appendChild(div);
+    });
+}
+
+/* ===================================================
+   BIND CONTROLES
+=================================================== */
+const CONTROL_MAP = [
+    ['clrNavBg',    'hexNavBg',    'navBg'],
+    ['clrNavText',  'hexNavText',  'navText'],
+    ['clrNavBrand', 'hexNavBrand', 'navBrand'],
+    ['clrDropBg',   'hexDropBg',   'dropBg'],
+    ['clrPrimary',  'hexPrimary',  'primary'],
+    ['clrAccent',   'hexAccent',   'accent'],
+    ['clrSuccess',  'hexSuccess',  'success'],
+    ['clrDanger',   'hexDanger',   'danger'],
+    ['clrWarning',  'hexWarning',  'warning'],
+    ['clrInfo',     'hexInfo',     'info'],
+    ['clrPageBg',   'hexPageBg',   'pageBg'],
+    ['clrCardBg',   'hexCardBg',   'cardBg'],
+    ['clrTableHead','hexTableHead','tableHead'],
+    ['clrBorder',   'hexBorder',   'border'],
+    ['clrTextMain', 'hexTextMain', 'textMain'],
+    ['clrTextMuted','hexTextMuted','textMuted'],
+    ['clrLink',     'hexLink',     'link'],
+];
+
+function bindAllControls() {
+    CONTROL_MAP.forEach(([clrId, hexId, key]) => {
+        const clr = document.getElementById(clrId);
+        const hex = document.getElementById(hexId);
+        if (!clr || !hex) return;
+        clr.addEventListener('input', () => {
+            current[key] = clr.value;
+            hex.value = clr.value.toUpperCase();
+            updatePreview(); updateCode();
+            document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+        });
+        hex.addEventListener('input', () => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(hex.value)) {
+                current[key] = hex.value;
+                clr.value = hex.value;
+                updatePreview(); updateCode();
+                document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+            }
+        });
+    });
+
+    const slider = document.getElementById('sliderOpacity');
+    slider.addEventListener('input', () => {
+        current.opacity = parseInt(slider.value);
+        document.getElementById('opacityVal').textContent = slider.value + '%';
+        updatePreview(); updateCode();
+    });
+}
+
+function syncAllInputs() {
+    CONTROL_MAP.forEach(([clrId, hexId, key]) => {
+        const clr = document.getElementById(clrId);
+        const hex = document.getElementById(hexId);
+        if (clr) clr.value = current[key] || '#ffffff';
+        if (hex) hex.value = (current[key] || '#ffffff').toUpperCase();
+    });
+    const sl = document.getElementById('sliderOpacity');
+    if (sl) { sl.value = current.opacity || 100; document.getElementById('opacityVal').textContent = (current.opacity||100)+'%'; }
+}
+
+/* ===================================================
+   PREVIEW
+=================================================== */
+function hexToRgb(h) {
+    return `${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`;
+}
+
+function updatePreview() {
+    const op = (current.opacity||100)/100;
+    const rgb = hexToRgb(current.navBg);
+
+    // Navbar
+    const nav = document.getElementById('navPreview');
+    nav.style.background = `rgba(${rgb},${op})`;
+    document.getElementById('prevBrand').style.color = current.navBrand;
+    ['prevLink1','prevLink3'].forEach(id => {
+        document.getElementById(id).style.color = current.navText;
+        document.getElementById(id).style.background = 'transparent';
+    });
+    document.getElementById('prevLink2').style.color = current.accent;
+    document.getElementById('prevLink2').style.background = current.accent+'22';
+    document.getElementById('prevUser').style.color = current.navText;
+
+    // Page bg
+    document.getElementById('pagePreview').style.background = current.pageBg;
+
+    // Buttons
+    setStyle('prevBtnPrimary', { background: current.primary, color: '#fff' });
+    setStyle('prevBtnSuccess', { background: current.success, color: '#fff' });
+    setStyle('prevBtnDanger',  { background: current.danger,  color: '#fff' });
+    setStyle('prevBtnWarning', { background: current.warning, color: '#000' });
+
+    // Badges
+    setStyle('prevBadgePrimary', { background: current.primary+'22', color: current.primary });
+    setStyle('prevBadgeSuccess', { background: current.success+'22', color: current.success });
+    setStyle('prevBadgeDanger',  { background: current.danger+'22',  color: current.danger  });
+    setStyle('prevBadgeInfo',    { background: current.info+'22',    color: current.info    });
+
+    // Link
+    document.getElementById('prevLink').style.color = current.link;
+
+    // Cards header
+    document.getElementById('prevCardH1').style.background = current.primary;
+    document.getElementById('prevCardH2').style.background = current.success;
+
+    // Progress
+    document.getElementById('prevProgressFill').style.background = current.primary;
+    document.getElementById('prevTableLabel').style.color = current.textMain;
+    document.getElementById('prevTableValue').style.color = current.primary;
+}
+
+function setStyle(id, styles) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    Object.assign(el.style, styles);
+}
+
+/* ===================================================
+   CÓDIGO
+=================================================== */
+function updateCode() {
+    document.getElementById('codigoPaleta').value = JSON.stringify(current, null, 2);
+}
+
+/* ===================================================
+   APLICAR AL DOM COMPLETO
+=================================================== */
+function buildCSS(c) {
+    const op = (c.opacity||100)/100;
+    const navRgb = hexToRgb(c.navBg);
+
+    return `
+/* ─────── VentaApp Theme v2 ─────── */
+
+/* Variables globales */
+:root {
+    --va-primary:    ${c.primary};
+    --va-accent:     ${c.accent};
+    --va-success:    ${c.success};
+    --va-danger:     ${c.danger};
+    --va-warning:    ${c.warning};
+    --va-info:       ${c.info};
+    --va-page-bg:    ${c.pageBg};
+    --va-card-bg:    ${c.cardBg};
+    --va-table-head: ${c.tableHead};
+    --va-border:     ${c.border};
+    --va-text:       ${c.textMain};
+    --va-muted:      ${c.textMuted};
+    --va-link:       ${c.link};
+    --va-nav-bg:     ${c.navBg};
+    --va-nav-text:   ${c.navText};
+    --va-nav-brand:  ${c.navBrand};
+    --va-drop-bg:    ${c.dropBg};
+}
+
+/* ── BODY ── */
+body { background-color: ${c.pageBg} !important; color: ${c.textMain} !important; }
+
+/* ── NAVBAR ── */
+.navbar[data-bs-theme] {
+    background: rgba(${navRgb},${op}) !important;
+    backdrop-filter: ${op<1?'blur(14px)':'none'} !important;
+    transition: background .4s !important;
+}
+.navbar .navbar-brand, .navbar .navbar-brand i { color: ${c.navBrand} !important; }
+.navbar .nav-link, .navbar .navbar-nav .nav-link { color: ${c.navText} !important; }
+.navbar .nav-link:hover, .navbar .nav-link:focus {
+    color: ${c.accent} !important;
+    background: ${c.accent}22 !important;
+    border-radius: 8px !important;
+}
+.navbar .dropdown-menu {
+    background: ${c.dropBg} !important;
+    border-color: ${c.accent}33 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18) !important;
+}
+.navbar .dropdown-item { color: ${c.navText} !important; }
+.navbar .dropdown-item:hover {
+    background: ${c.accent}22 !important;
+    color: ${c.accent} !important;
+    border-radius: 8px !important;
+}
+.navbar .dropdown-header strong { color: ${c.navBrand} !important; }
+.navbar .dropdown-divider { border-color: ${c.navText}22 !important; }
+.navbar .form-control {
+    background: ${c.dropBg} !important;
+    color: ${c.navText} !important;
+    border-color: ${c.navText}33 !important;
+}
+.navbar .form-control::placeholder { color: ${c.navText}77 !important; }
+.navbar .btn-outline-success {
+    color: ${c.accent} !important;
+    border-color: ${c.accent} !important;
+}
+.navbar .btn-outline-success:hover {
+    background: ${c.accent} !important;
+    color: #fff !important;
+}
+
+/* ── BOTONES ── */
+.btn-primary { background-color: ${c.primary} !important; border-color: ${c.primary} !important; color: #fff !important; }
+.btn-primary:hover { background-color: ${c.primary}dd !important; border-color: ${c.primary}dd !important; }
+.btn-outline-primary { color: ${c.primary} !important; border-color: ${c.primary} !important; }
+.btn-outline-primary:hover { background-color: ${c.primary} !important; color: #fff !important; }
+
+.btn-success { background-color: ${c.success} !important; border-color: ${c.success} !important; color: #fff !important; }
+.btn-success:hover { background-color: ${c.success}dd !important; }
+.btn-outline-success:not(.navbar .btn-outline-success) { color: ${c.success} !important; border-color: ${c.success} !important; }
+.btn-outline-success:not(.navbar .btn-outline-success):hover { background-color: ${c.success} !important; color: #fff !important; }
+
+.btn-danger { background-color: ${c.danger} !important; border-color: ${c.danger} !important; color: #fff !important; }
+.btn-danger:hover { background-color: ${c.danger}dd !important; }
+.btn-outline-danger { color: ${c.danger} !important; border-color: ${c.danger} !important; }
+.btn-outline-danger:hover { background-color: ${c.danger} !important; color: #fff !important; }
+
+.btn-warning { background-color: ${c.warning} !important; border-color: ${c.warning} !important; }
+.btn-warning:hover { background-color: ${c.warning}dd !important; }
+.btn-outline-warning { color: ${c.warning} !important; border-color: ${c.warning} !important; }
+.btn-outline-warning:hover { background-color: ${c.warning} !important; }
+
+.btn-info { background-color: ${c.info} !important; border-color: ${c.info} !important; color: #fff !important; }
+.btn-info:hover { background-color: ${c.info}dd !important; }
+.btn-outline-info { color: ${c.info} !important; border-color: ${c.info} !important; }
+.btn-outline-info:hover { background-color: ${c.info} !important; color: #fff !important; }
+
+/* ── CARDS ── */
+.card { background: ${c.cardBg} !important; border-color: ${c.border} !important; }
+.card-header.bg-primary { background-color: ${c.primary} !important; }
+.card-header.bg-success { background-color: ${c.success} !important; }
+.card-header.bg-danger  { background-color: ${c.danger} !important; }
+.card-header.bg-warning { background-color: ${c.warning} !important; }
+.card-header.bg-info    { background-color: ${c.info} !important; }
+.card-header.bg-dark    { background-color: ${c.tableHead} !important; }
+.card-header.bg-secondary { background-color: ${c.textMuted} !important; }
+
+/* ── BADGES ── */
+.badge.bg-primary   { background-color: ${c.primary} !important; }
+.badge.bg-success   { background-color: ${c.success} !important; }
+.badge.bg-danger    { background-color: ${c.danger} !important; }
+.badge.bg-warning   { background-color: ${c.warning} !important; color: #000 !important; }
+.badge.bg-info      { background-color: ${c.info} !important; color: #fff !important; }
+.badge.bg-dark      { background-color: ${c.tableHead} !important; }
+.badge.bg-secondary { background-color: ${c.textMuted} !important; }
+
+/* ── TABLAS ── */
+.table-dark, thead.table-dark tr, .table thead.table-dark th { background-color: ${c.tableHead} !important; color: #fff !important; }
+.table-hover tbody tr:hover { background-color: ${c.primary}11 !important; }
+.table-striped tbody tr:nth-of-type(odd) { background-color: ${c.primary}08 !important; }
+.table-primary { background-color: ${c.primary}22 !important; }
+.table-success { background-color: ${c.success}22 !important; }
+.table-danger  { background-color: ${c.danger}22 !important; }
+.table-warning { background-color: ${c.warning}22 !important; }
+
+/* ── ALERTAS ── */
+.alert-success { background-color: ${c.success}22 !important; border-color: ${c.success}66 !important; color: ${c.success} !important; }
+.alert-danger  { background-color: ${c.danger}22 !important; border-color: ${c.danger}66 !important; color: ${c.danger} !important; }
+.alert-warning { background-color: ${c.warning}22 !important; border-color: ${c.warning}66 !important; color: ${c.warning}cc !important; }
+.alert-info    { background-color: ${c.info}22 !important; border-color: ${c.info}66 !important; color: ${c.info} !important; }
+.alert-primary { background-color: ${c.primary}22 !important; border-color: ${c.primary}66 !important; color: ${c.primary} !important; }
+
+/* ── FORMULARIOS ── */
+.form-control:focus, .form-select:focus {
+    border-color: ${c.accent} !important;
+    box-shadow: 0 0 0 .2rem ${c.accent}33 !important;
+}
+.form-check-input:checked { background-color: ${c.primary} !important; border-color: ${c.primary} !important; }
+
+/* ── PROGRESS BARS ── */
+.progress-bar { background-color: ${c.primary} !important; }
+.progress-bar.bg-success { background-color: ${c.success} !important; }
+.progress-bar.bg-danger  { background-color: ${c.danger} !important; }
+.progress-bar.bg-warning { background-color: ${c.warning} !important; }
+.progress-bar.bg-info    { background-color: ${c.info} !important; }
+
+/* ── MODALES ── */
+.modal-header.bg-primary { background-color: ${c.primary} !important; }
+.modal-header.bg-danger  { background-color: ${c.danger} !important; }
+.modal-header.bg-success { background-color: ${c.success} !important; }
+.modal-header.bg-warning { background-color: ${c.warning} !important; }
+.modal-content { background: ${c.cardBg} !important; border-color: ${c.border} !important; }
+
+/* ── PAGINACIÓN ── */
+.page-link { color: ${c.primary} !important; }
+.page-item.active .page-link { background-color: ${c.primary} !important; border-color: ${c.primary} !important; color: #fff !important; }
+
+/* ── LINKS ── */
+a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item) { color: ${c.link} !important; }
+a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item):hover { color: ${c.accent} !important; }
+
+/* ── TEXTOS COLOREADOS ── */
+.text-primary { color: ${c.primary} !important; }
+.text-success { color: ${c.success} !important; }
+.text-danger  { color: ${c.danger} !important; }
+.text-warning { color: ${c.warning} !important; }
+.text-info    { color: ${c.info} !important; }
+.text-muted   { color: ${c.textMuted} !important; }
+
+/* ── BORDES COLOREADOS ── */
+.border-primary { border-color: ${c.primary} !important; }
+.border-success { border-color: ${c.success} !important; }
+.border-danger  { border-color: ${c.danger} !important; }
+.border-warning { border-color: ${c.warning} !important; }
+.border-info    { border-color: ${c.info} !important; }
+.border-top, .border-bottom { border-color: ${c.border} !important; }
+
+/* ── BG COLORES ── */
+.bg-primary   { background-color: ${c.primary} !important; }
+.bg-success   { background-color: ${c.success} !important; }
+.bg-danger    { background-color: ${c.danger} !important; }
+.bg-warning   { background-color: ${c.warning} !important; }
+.bg-info      { background-color: ${c.info} !important; }
+.bg-light     { background-color: ${c.cardBg} !important; }
+
+/* ── LIST GROUPS ── */
+.list-group-item-action:hover { background: ${c.primary}11 !important; }
+.list-group-item.active { background-color: ${c.primary} !important; border-color: ${c.primary} !important; }
+
+/* ── INPUT GROUP ── */
+.input-group-text { background-color: ${c.pageBg} !important; border-color: ${c.border} !important; color: ${c.textMuted} !important; }
+
+/* ── FOOTER ── */
+footer.footer { border-color: ${c.border} !important; color: ${c.textMuted} !important; }
+footer.footer a { color: ${c.link} !important; }
+`;
+}
+
+function aplicarAlDOM(c) {
+    let style = document.getElementById('ventaapp-theme-v2');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'ventaapp-theme-v2';
+        document.head.appendChild(style);
+    }
+    style.textContent = buildCSS(c);
+}
+
+/* ===================================================
+   GUARDAR / RESETEAR
+=================================================== */
+function aplicarYGuardar() {
+    localStorage.setItem('ventaapp_palette_v2', JSON.stringify(current));
+    aplicarAlDOM(current);
+    mostrarToast('¡Paleta aplicada en todo el sistema y guardada!');
+}
+
+function resetearColores() {
+    Object.assign(current, DEFAULT);
+    syncAllInputs();
+    updatePreview();
+    updateCode();
+    localStorage.removeItem('ventaapp_palette_v2');
+    aplicarAlDOM(current);
+    document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+    mostrarToast('Colores restaurados al predeterminado');
+}
+
+function copiarCodigo() {
+    const ta = document.getElementById('codigoPaleta');
+    ta.select();
+    document.execCommand('copy');
+    mostrarToast('Código copiado al portapapeles 📋');
+}
+
+function mostrarToast(msg) {
+    const t = document.getElementById('toastMsg');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+}

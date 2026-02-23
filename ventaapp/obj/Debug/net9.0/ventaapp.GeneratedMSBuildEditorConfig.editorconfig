@@ -30,6 +30,10 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
+[/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Ajustes/Editar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWp1c3Rlcy9FZGl0YXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/Views/Auth/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXV0aC9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
