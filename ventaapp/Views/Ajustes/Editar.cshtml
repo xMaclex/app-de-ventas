@@ -50,6 +50,98 @@
     }
     .panel-title i { font-size: 1rem; }
 
+    /* ── Dark Mode Toggle ───────────────────────────── */
+    .dark-mode-panel {
+        display: flex; align-items: center; justify-content: space-between;
+        background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+        border-radius: 16px; padding: 1.2rem 1.4rem;
+        margin-bottom: 1.2rem; border: 1.5px solid #2d3147;
+        box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    }
+    .dark-mode-info { display: flex; align-items: center; gap: .9rem; }
+    .dark-mode-icon {
+        width: 44px; height: 44px; border-radius: 12px;
+        background: linear-gradient(135deg, #1e2235 0%, #2d3147 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; border: 1px solid #3d4263;
+    }
+    .dark-mode-texts strong { color: #e2e8f0; font-size: .95rem; font-weight: 700; display: block; }
+    .dark-mode-texts small { color: #64748b; font-size: .77rem; }
+    
+    /* Toggle switch */
+    .toggle-switch { position: relative; width: 60px; height: 32px; cursor: pointer; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+        position: absolute; inset: 0; border-radius: 32px;
+        background: #2d3147; border: 2px solid #3d4263;
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+    }
+    .toggle-slider::before {
+        content: '☀️'; position: absolute; font-size: .85rem;
+        left: 3px; top: 50%; transform: translateY(-50%);
+        width: 24px; height: 24px; line-height: 24px; text-align: center;
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+    }
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #3b4a7a, #4f8ef7);
+        border-color: #4f8ef7;
+        box-shadow: 0 0 12px #4f8ef766;
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+        content: '🌙'; left: calc(100% - 27px);
+    }
+
+    /* ── Panel paleta modo oscuro ───────────────────── */
+    .dark-palette-panel {
+        display: none;
+        background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+        border: 1.5px solid #2d3147;
+        border-radius: 18px;
+        padding: 1.6rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,.22);
+        animation: slideDown .3s ease;
+    }
+    .dark-palette-panel.visible { display: block; }
+    @@keyframes slideDown {
+        from { opacity:0; transform: translateY(-10px); }
+        to   { opacity:1; transform: translateY(0); }
+    }
+    .dark-palette-panel .panel-title { color: #94a3b8 !important; }
+    .dark-palette-panel .color-row {
+        border-bottom-color: #2d3147 !important;
+    }
+    .dark-palette-panel .color-label strong { color: #e2e8f0 !important; }
+    .dark-palette-panel .color-label small  { color: #64748b !important; }
+    .dark-palette-panel .hex-input {
+        background: #252836 !important;
+        border-color: #3d4263 !important;
+        color: #e2e8f0 !important;
+    }
+
+    .dark-preset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: .6rem;
+        margin-bottom: 1.2rem;
+    }
+    .dark-preset-card {
+        border-radius: 12px; overflow: hidden; cursor: pointer;
+        border: 2px solid #2d3147; transition: all .2s ease; position: relative;
+        background: #0f1117;
+    }
+    .dark-preset-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.4); border-color: #3d4263; }
+    .dark-preset-card.active { border-color: #4f8ef7; box-shadow: 0 0 0 2px rgba(79,142,247,.35); }
+    .dark-preset-card.active::after {
+        content: '✓'; position: absolute; top: 5px; right: 7px;
+        background: #4f8ef7; color: #fff; border-radius: 50%;
+        width: 18px; height: 18px; font-size: .65rem; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .dark-preset-bar { height: 40px; display: flex; }
+    .dark-preset-bar span { flex: 1; }
+    .dark-preset-name { font-size: .72rem; font-weight: 700; color: #94a3b8; padding: .4rem .6rem .5rem; background: #0f1117; display: block; }
+
     /* Presets */
     .preset-grid {
         display: grid;
@@ -176,6 +268,66 @@
 
         <!-- ── Columna izquierda ───────────────────── -->
         <div>
+
+            <!-- MODO OSCURO -->
+            <div class="dark-mode-panel" id="darkModePanel">
+                <div class="dark-mode-info">
+                    <div class="dark-mode-icon" id="darkModeIcon">🌙</div>
+                    <div class="dark-mode-texts">
+                        <strong id="darkModeTitle">Modo Oscuro</strong>
+                        <small id="darkModeDesc">Activar fondo oscuro en todo el sistema</small>
+                    </div>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="toggleDarkMode" onchange="toggleDark(this.checked)" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <!-- PALETA MODO OSCURO (visible solo cuando isDark=true) -->
+            <div class="dark-palette-panel" id="darkPalettePanel">
+                <div class="panel-title"><i class="bi bi-moon-stars-fill" style="color:#818cf8;"></i> Colores del Modo Oscuro</div>
+
+                <!-- Presets oscuros -->
+                <div class="dark-preset-grid" id="darkPresetGrid"></div>
+
+                <!-- Colores personalizables -->
+                <div class="color-row">
+                    <input type="color" class="color-swatch" id="clrDkBody" />
+                    <div class="color-label"><strong>Fondo Principal</strong><small>Color del body en modo oscuro</small></div>
+                    <input type="text" class="hex-input" id="hexDkBody" maxlength="7" />
+                </div>
+                <div class="color-row">
+                    <input type="color" class="color-swatch" id="clrDkCard" />
+                    <div class="color-label"><strong>Fondo de Cards</strong><small>Tarjetas, modales y paneles</small></div>
+                    <input type="text" class="hex-input" id="hexDkCard" maxlength="7" />
+                </div>
+                <div class="color-row">
+                    <input type="color" class="color-swatch" id="clrDkSurface" />
+                    <div class="color-label"><strong>Superficie / Headers</strong><small>Card headers, dropdowns, thead</small></div>
+                    <input type="text" class="hex-input" id="hexDkSurface" maxlength="7" />
+                </div>
+                <div class="color-row">
+                    <input type="color" class="color-swatch" id="clrDkInput" />
+                    <div class="color-label"><strong>Fondo de Inputs</strong><small>Formularios y selects</small></div>
+                    <input type="text" class="hex-input" id="hexDkInput" maxlength="7" />
+                </div>
+                <div class="color-row">
+                    <input type="color" class="color-swatch" id="clrDkBorder" />
+                    <div class="color-label"><strong>Bordes</strong><small>Divisores y contornos</small></div>
+                    <input type="text" class="hex-input" id="hexDkBorder" maxlength="7" />
+                </div>
+                <div class="color-row">
+                    <input type="color" class="color-swatch" id="clrDkText" />
+                    <div class="color-label"><strong>Texto Principal</strong><small>Color del texto en oscuro</small></div>
+                    <input type="text" class="hex-input" id="hexDkText" maxlength="7" />
+                </div>
+                <div class="color-row" style="border-bottom:none;">
+                    <input type="color" class="color-swatch" id="clrDkMuted" />
+                    <div class="color-label"><strong>Texto Secundario</strong><small>Subtítulos, text-muted</small></div>
+                    <input type="text" class="hex-input" id="hexDkMuted" maxlength="7" />
+                </div>
+            </div>
 
             <!-- Presets -->
             <div class="card-panel">
@@ -486,6 +638,140 @@ const PRESETS = [
 ];
 
 /* ===================================================
+   MODO OSCURO
+=================================================== */
+let isDark = localStorage.getItem('ventaapp_dark_mode') === 'true';
+
+/* Paletas predefinidas para modo oscuro */
+const DARK_PRESETS = [
+    { name:'Noche Clásica', dkBody:'#0f1117', dkCard:'#1a1d27', dkSurface:'#252836', dkInput:'#252836', dkBorder:'#2d3147', dkText:'#e2e8f0', dkMuted:'#64748b' },
+    { name:'Carbón Pro',    dkBody:'#111111', dkCard:'#1c1c1c', dkSurface:'#262626', dkInput:'#1c1c1c', dkBorder:'#333333', dkText:'#f5f5f5', dkMuted:'#888888' },
+    { name:'Medianoche',    dkBody:'#0d1117', dkCard:'#161b22', dkSurface:'#21262d', dkInput:'#0d1117', dkBorder:'#30363d', dkText:'#c9d1d9', dkMuted:'#8b949e' },
+    { name:'Zafiro Noche',  dkBody:'#0a0f1e', dkCard:'#111827', dkSurface:'#1e2a45', dkInput:'#1a2235', dkBorder:'#1e3a6a', dkText:'#e2e8f0', dkMuted:'#5b7da8' },
+    { name:'Bosque Oscuro', dkBody:'#0a120a', dkCard:'#0f1f0f', dkSurface:'#162316', dkInput:'#132013', dkBorder:'#1f3d1f', dkText:'#d4edda', dkMuted:'#4a7c59' },
+    { name:'Vinotinto',     dkBody:'#120810', dkCard:'#1e0f1c', dkSurface:'#2a1528', dkInput:'#1e1020', dkBorder:'#3d1a3a', dkText:'#f3e8f5', dkMuted:'#8b4a85' },
+    { name:'Pizarra',       dkBody:'#1e293b', dkCard:'#263549', dkSurface:'#334155', dkInput:'#263549', dkBorder:'#475569', dkText:'#f1f5f9', dkMuted:'#94a3b8' },
+    { name:'Sepia Oscuro',  dkBody:'#1a1208', dkCard:'#261b0c', dkSurface:'#332510', dkInput:'#261b0c', dkBorder:'#4a3820', dkText:'#fdf0dc', dkMuted:'#9a7d50' },
+];
+
+const DEFAULT_DARK = {
+    dkBody:'#0f1117', dkCard:'#1a1d27', dkSurface:'#252836',
+    dkInput:'#252836', dkBorder:'#2d3147', dkText:'#e2e8f0', dkMuted:'#64748b'
+};
+
+let currentDark = Object.assign({}, DEFAULT_DARK);
+
+const DARK_CONTROL_MAP = [
+    ['clrDkBody',    'hexDkBody',    'dkBody'],
+    ['clrDkCard',    'hexDkCard',    'dkCard'],
+    ['clrDkSurface', 'hexDkSurface', 'dkSurface'],
+    ['clrDkInput',   'hexDkInput',   'dkInput'],
+    ['clrDkBorder',  'hexDkBorder',  'dkBorder'],
+    ['clrDkText',    'hexDkText',    'dkText'],
+    ['clrDkMuted',   'hexDkMuted',   'dkMuted'],
+];
+
+function initDarkToggle() {
+    const savedDark = localStorage.getItem('ventaapp_dark_palette');
+    if (savedDark) { try { Object.assign(currentDark, JSON.parse(savedDark)); } catch(e){} }
+    document.getElementById('toggleDarkMode').checked = isDark;
+    updateDarkUI(isDark);
+    if (isDark) document.documentElement.classList.add('va-dark');
+    renderDarkPresets();
+    bindDarkControls();
+    syncDarkInputs();
+}
+
+function toggleDark(enabled) {
+    isDark = enabled;
+    if (enabled) {
+        document.documentElement.classList.add('va-dark');
+        localStorage.setItem('ventaapp_dark_mode', 'true');
+    } else {
+        document.documentElement.classList.remove('va-dark');
+        localStorage.setItem('ventaapp_dark_mode', 'false');
+    }
+    updateDarkUI(enabled);
+    aplicarAlDOM(current);
+    mostrarToast(enabled ? '🌙 Modo oscuro activado' : '☀️ Modo claro restaurado');
+}
+
+function updateDarkUI(enabled) {
+    const icon = document.getElementById('darkModeIcon');
+    const title = document.getElementById('darkModeTitle');
+    const desc = document.getElementById('darkModeDesc');
+    const panel = document.getElementById('darkModePanel');
+    const palettePanel = document.getElementById('darkPalettePanel');
+    if (enabled) {
+        icon.textContent = '☀️';
+        title.textContent = 'Modo Oscuro Activo';
+        desc.textContent = 'Desactivar para volver al modo claro';
+        panel.style.background = 'linear-gradient(135deg, #1a1d27 0%, #252836 100%)';
+        panel.style.borderColor = '#4f8ef766';
+        panel.style.boxShadow = '0 4px 20px rgba(79,142,247,.15), 0 0 0 1px #4f8ef722';
+        palettePanel.classList.add('visible');
+    } else {
+        icon.textContent = '🌙';
+        title.textContent = 'Modo Oscuro';
+        desc.textContent = 'Activar fondo oscuro en todo el sistema';
+        panel.style.background = 'linear-gradient(135deg, #0f1117 0%, #1a1d27 100%)';
+        panel.style.borderColor = '#2d3147';
+        panel.style.boxShadow = '0 4px 20px rgba(0,0,0,.15)';
+        palettePanel.classList.remove('visible');
+    }
+}
+
+function renderDarkPresets() {
+    const grid = document.getElementById('darkPresetGrid');
+    grid.innerHTML = '';
+    DARK_PRESETS.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'dark-preset-card';
+        div.id = 'dkpreset_' + i;
+        div.innerHTML = `<div class="dark-preset-bar"><span style="background:${p.dkBody}"></span><span style="background:${p.dkCard}"></span><span style="background:${p.dkSurface}"></span><span style="background:${p.dkText}22;outline:1px solid ${p.dkText}44"></span></div><span class="dark-preset-name">${p.name}</span>`;
+        div.addEventListener('click', () => {
+            Object.assign(currentDark, p);
+            syncDarkInputs();
+            aplicarAlDOM(current);
+            document.querySelectorAll('.dark-preset-card').forEach(c => c.classList.remove('active'));
+            div.classList.add('active');
+        });
+        grid.appendChild(div);
+    });
+}
+
+function bindDarkControls() {
+    DARK_CONTROL_MAP.forEach(([clrId, hexId, key]) => {
+        const clr = document.getElementById(clrId);
+        const hex = document.getElementById(hexId);
+        if (!clr || !hex) return;
+        clr.addEventListener('input', () => {
+            currentDark[key] = clr.value;
+            hex.value = clr.value.toUpperCase();
+            aplicarAlDOM(current);
+            document.querySelectorAll('.dark-preset-card').forEach(c => c.classList.remove('active'));
+        });
+        hex.addEventListener('input', () => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(hex.value)) {
+                currentDark[key] = hex.value;
+                clr.value = hex.value;
+                aplicarAlDOM(current);
+                document.querySelectorAll('.dark-preset-card').forEach(c => c.classList.remove('active'));
+            }
+        });
+    });
+}
+
+function syncDarkInputs() {
+    DARK_CONTROL_MAP.forEach(([clrId, hexId, key]) => {
+        const clr = document.getElementById(clrId);
+        const hex = document.getElementById(hexId);
+        if (clr) clr.value = currentDark[key] || '#1a1d27';
+        if (hex) hex.value = (currentDark[key] || '#1a1d27').toUpperCase();
+    });
+}
+
+/* ===================================================
    ESTADO
 =================================================== */
 const DEFAULT = {
@@ -503,6 +789,7 @@ let current = Object.assign({}, DEFAULT);
 document.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('ventaapp_palette_v2');
     if (saved) { try { Object.assign(current, JSON.parse(saved)); } catch(e){} }
+    initDarkToggle();
     renderPresets();
     bindAllControls();
     syncAllInputs();
@@ -678,6 +965,22 @@ function buildCSS(c) {
     const op = (c.opacity||100)/100;
     const navRgb = hexToRgb(c.navBg);
 
+    // Calcula si un color es claro (luminance > 128)
+    function isLight(hex) {
+        if (!hex || hex.length < 7) return true;
+        const r = parseInt(hex.slice(1,3),16);
+        const g = parseInt(hex.slice(3,5),16);
+        const b = parseInt(hex.slice(5,7),16);
+        return (r*299 + g*587 + b*114) / 1000 > 128;
+    }
+    // Color de texto sobre el dropdown con contraste garantizado
+    let dropTxt = isLight(c.dropBg) ? '#1a202c' : '#f8f9fa';
+    if (c.navText && c.dropBg) {
+        const ntLight = isLight(c.navText);
+        const bgLight = isLight(c.dropBg);
+        if (ntLight !== bgLight) dropTxt = c.navText;
+    }
+
     return `
 /* ─────── VentaApp Theme v2 ─────── */
 
@@ -724,20 +1027,20 @@ body { background-color: ${c.pageBg} !important; color: ${c.textMain} !important
     border-radius: 14px !important;
     box-shadow: 0 8px 32px rgba(0,0,0,.18) !important;
 }
-.navbar .dropdown-item { color: ${c.navText} !important; }
+.navbar .dropdown-item { color: ${dropTxt} !important; }
 .navbar .dropdown-item:hover {
-    background: ${c.accent}22 !important;
-    color: ${c.accent} !important;
+    background: ${c.accent} !important;
+    color: #fff !important;
     border-radius: 8px !important;
 }
-.navbar .dropdown-header strong { color: ${c.navBrand} !important; }
-.navbar .dropdown-divider { border-color: ${c.navText}22 !important; }
+.navbar .dropdown-header strong { color: ${c.accent} !important; }
+.navbar .dropdown-divider { border-color: ${dropTxt}22 !important; }
 .navbar .form-control {
     background: ${c.dropBg} !important;
-    color: ${c.navText} !important;
-    border-color: ${c.navText}33 !important;
+    color: ${dropTxt} !important;
+    border-color: ${dropTxt}33 !important;
 }
-.navbar .form-control::placeholder { color: ${c.navText}77 !important; }
+.navbar .form-control::placeholder { color: ${dropTxt}77 !important; }
 .navbar .btn-outline-success {
     color: ${c.accent} !important;
     border-color: ${c.accent} !important;
@@ -874,6 +1177,135 @@ footer.footer a { color: ${c.link} !important; }
 `;
 }
 
+function buildDarkCSS(c, dk) {
+    const dp  = c.primary  || '#4f8ef7';
+    const ds  = c.success  || '#22c55e';
+    const dd  = c.danger   || '#ef4444';
+    const dw  = c.warning  || '#fbbf24';
+    const di  = c.info     || '#38bdf8';
+    const dac = c.accent   || dp;
+    // Colores de la paleta oscura personalizada
+    const bg   = dk.dkBody    || '#0f1117';
+    const card = dk.dkCard    || '#1a1d27';
+    const surf = dk.dkSurface || '#252836';
+    const inp  = dk.dkInput   || '#252836';
+    const brd  = dk.dkBorder  || '#2d3147';
+    const txt  = dk.dkText    || '#e2e8f0';
+    const mut  = dk.dkMuted   || '#64748b';
+    // Color de borde más oscuro para separadores internos
+    const brdIn = brd + 'cc';
+    return [
+        /* ── Variables CSS del editor (para los card-panel) ── */
+        '.va-dark{--editor-bg:'+bg+' !important;--card-bg:'+card+' !important;--text-main:'+txt+' !important;--text-muted:'+mut+' !important;--border:'+brd+' !important;--shadow:0 4px 24px rgba(0,0,0,.35) !important;}',
+        /* Overrides directos para card-panel y textos del editor */
+        '.va-dark .card-panel{background:'+card+' !important;border:1px solid '+brd+' !important;box-shadow:0 4px 24px rgba(0,0,0,.3) !important;}',
+        '.va-dark .panel-title{color:'+mut+' !important;}',
+        '.va-dark .color-row{border-bottom-color:'+brd+' !important;}',
+        '.va-dark .color-label strong{color:'+txt+' !important;}',
+        '.va-dark .color-label small{color:'+mut+' !important;}',
+        '.va-dark .hex-input{background:'+surf+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .editor-header h2{color:'+txt+' !important;}',
+        '.va-dark .editor-header p{color:'+mut+' !important;}',
+        '.va-dark .color-tab{background:'+surf+' !important;color:'+mut+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .color-tab.active{background:'+dp+' !important;color:#fff !important;}',
+        '.va-dark .color-tab:hover:not(.active){background:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .preset-name{background:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark #codigoPaleta{background:'+surf+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .btn-apply-reset{background:'+surf+' !important;color:'+mut+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .btn-apply-reset:hover{background:'+brd+' !important;}',
+        /* Info box dentro de guardar cambios */
+        '.va-dark .card-panel div[style*="background:#f8fafc"]{background:'+surf+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .card-panel div[style*="background:#f8fafc"] small{color:'+mut+' !important;}',
+        /* Botón copiar */
+        '.va-dark .card-panel button[onclick="copiarCodigo()"]{background:'+surf+' !important;border-color:'+brd+' !important;color:'+mut+' !important;}',
+        /* preview area page bg */
+        '.va-dark .page-preview-full{background:'+bg+' !important;}',
+        '.va-dark body{background-color:'+bg+' !important;color:'+txt+' !important;}',
+        '.va-dark .card,.va-dark .card-panel-inner{background:'+card+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .card-body,.va-dark .card-footer{color:'+txt+' !important;}',
+        '.va-dark .card-header{background:'+surf+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .card-header.bg-primary{background-color:'+dp+' !important;color:#fff !important;}',
+        '.va-dark .card-header.bg-success{background-color:'+ds+' !important;color:#fff !important;}',
+        '.va-dark .card-header.bg-danger{background-color:'+dd+' !important;color:#fff !important;}',
+        '.va-dark .card-header.bg-warning{background-color:'+dw+' !important;}',
+        '.va-dark .card-header.bg-info{background-color:'+di+' !important;color:#fff !important;}',
+        '.va-dark .card-header.bg-dark{background-color:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark .modal-content{background:'+card+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .modal-header{background:'+surf+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .modal-footer{background:'+card+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .modal-header.bg-primary{background-color:'+dp+' !important;color:#fff !important;}',
+        '.va-dark .modal-header.bg-danger{background-color:'+dd+' !important;color:#fff !important;}',
+        '.va-dark .modal-header.bg-success{background-color:'+ds+' !important;color:#fff !important;}',
+        '.va-dark .form-control,.va-dark .form-select{background-color:'+inp+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .form-control::placeholder{color:'+mut+' !important;}',
+        '.va-dark .form-control:focus,.va-dark .form-select:focus{background-color:'+inp+' !important;border-color:'+dac+' !important;box-shadow:0 0 0 .2rem '+dac+'33 !important;color:'+txt+' !important;}',
+        '.va-dark .form-label,.va-dark label{color:'+txt+'cc !important;}',
+        '.va-dark .input-group-text{background:'+surf+' !important;border-color:'+brd+' !important;color:'+mut+' !important;}',
+        '.va-dark select option{background:'+inp+';color:'+txt+';}',
+        /* ── Tabla: forzar fondo oscuro en TODAS las filas y celdas ── */
+        '.va-dark .table{color:'+txt+' !important;background-color:'+card+' !important;}',
+        '.va-dark .table>:not(caption)>*>*{background-color:'+card+' !important;color:'+txt+' !important;border-bottom-color:'+brd+' !important;}',
+        '.va-dark .table tbody,.va-dark .table tbody tr,.va-dark .table tbody td,.va-dark .table tbody th{background-color:'+card+' !important;color:'+txt+' !important;}',
+        '.va-dark .table td,.va-dark .table th{border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .table thead th{background:'+surf+' !important;color:'+txt+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .table thead tr{background:'+surf+' !important;}',
+        '.va-dark .table tr[style*="background"]{background-color:'+card+' !important;}',
+        '.va-dark .table .bg-white,.va-dark .table .bg-light{background-color:'+card+' !important;}',
+        '.va-dark .table-dark,.va-dark thead.table-dark tr,.va-dark .table thead.table-dark th{background-color:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark .table-striped>tbody>tr:nth-of-type(odd)>*{background-color:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark .table-hover>tbody>tr:hover>*{background-color:'+dac+'22 !important;color:'+txt+' !important;}',
+        '.va-dark .table-hover>tbody>tr:hover td,.va-dark .table-hover>tbody>tr:hover th{color:'+txt+' !important;}',
+        '.va-dark .table-bordered,.va-dark .table-bordered td,.va-dark .table-bordered th{border-color:'+brd+' !important;}',
+        '.va-dark .table-primary>*,.va-dark .table-primary td,.va-dark .table-primary th{background-color:'+dp+'33 !important;color:'+txt+' !important;}',
+        '.va-dark .table-success>*,.va-dark .table-success td,.va-dark .table-success th{background-color:'+ds+'33 !important;color:'+txt+' !important;}',
+        '.va-dark .table-danger>*,.va-dark .table-danger td,.va-dark .table-danger th{background-color:'+dd+'33 !important;color:'+txt+' !important;}',
+        '.va-dark .table-warning>*,.va-dark .table-warning td,.va-dark .table-warning th{background-color:'+dw+'33 !important;color:'+txt+' !important;}',
+        '.va-dark .dropdown-menu{background:'+card+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .dropdown-item{color:'+txt+'cc !important;}',
+        '.va-dark .dropdown-item:hover{background:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark .dropdown-divider{border-color:'+brd+' !important;}',
+        '.va-dark .alert-success{background-color:'+ds+'18 !important;border-color:'+ds+'44 !important;color:'+ds+' !important;}',
+        '.va-dark .alert-danger{background-color:'+dd+'18 !important;border-color:'+dd+'44 !important;color:'+dd+' !important;}',
+        '.va-dark .alert-warning{background-color:'+dw+'18 !important;border-color:'+dw+'44 !important;color:'+dw+' !important;}',
+        '.va-dark .alert-info{background-color:'+di+'18 !important;border-color:'+di+'44 !important;color:'+di+' !important;}',
+        '.va-dark .alert-primary{background-color:'+dp+'18 !important;border-color:'+dp+'44 !important;color:'+dp+' !important;}',
+        '.va-dark .alert-dark,.va-dark .alert-secondary{background-color:'+surf+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .list-group-item{background:'+card+' !important;border-color:'+brd+' !important;color:'+txt+' !important;}',
+        '.va-dark .list-group-item-action:hover{background:'+surf+' !important;}',
+        '.va-dark .list-group-item.active{background-color:'+dp+' !important;border-color:'+dp+' !important;color:#fff !important;}',
+        '.va-dark .nav-tabs{border-color:'+brd+' !important;}',
+        '.va-dark .nav-tabs .nav-link{color:'+mut+' !important;}',
+        '.va-dark .nav-tabs .nav-link.active{background:'+card+' !important;border-color:'+brd+' '+brd+' '+card+' !important;color:'+dac+' !important;}',
+        '.va-dark .page-link{background:'+card+' !important;border-color:'+brd+' !important;color:'+dp+' !important;}',
+        '.va-dark .page-link:hover{background:'+surf+' !important;}',
+        '.va-dark .page-item.active .page-link{background-color:'+dp+' !important;border-color:'+dp+' !important;color:#fff !important;}',
+        '.va-dark .page-item.disabled .page-link{background:'+bg+' !important;border-color:'+brd+' !important;color:'+mut+' !important;}',
+        '.va-dark .text-dark{color:'+txt+' !important;}',
+        '.va-dark .text-muted{color:'+mut+' !important;}',
+        '.va-dark small,.va-dark .small{color:'+mut+' !important;}',
+        '.va-dark h1,.va-dark h2,.va-dark h3,.va-dark h4,.va-dark h5,.va-dark h6{color:'+txt+' !important;}',
+        '.va-dark .border{border-color:'+brd+' !important;}',
+        '.va-dark .border-top{border-top-color:'+brd+' !important;}',
+        '.va-dark .border-bottom{border-bottom-color:'+brd+' !important;}',
+        '.va-dark hr{border-color:'+brd+' !important;}',
+        '.va-dark .bg-light{background-color:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark .bg-white{background-color:'+card+' !important;}',
+        '.va-dark .bg-body{background-color:'+bg+' !important;}',
+        '.va-dark .accordion-item{background:'+card+' !important;border-color:'+brd+' !important;}',
+        '.va-dark .accordion-button{background:'+surf+' !important;color:'+txt+' !important;}',
+        '.va-dark .accordion-button:not(.collapsed){background:'+brd+' !important;color:'+dac+' !important;}',
+        '.va-dark .accordion-button::after{filter:invert(1);}',
+        '.va-dark .accordion-body{background:'+card+' !important;color:'+txt+' !important;}',
+        '.va-dark .offcanvas{background:'+card+' !important;color:'+txt+' !important;}',
+        '.va-dark footer.footer{background:'+bg+' !important;border-color:'+brd+' !important;color:'+mut+' !important;}',
+        '.va-dark .progress{background:'+surf+' !important;}',
+        '.va-dark .breadcrumb-item,.va-dark .breadcrumb-item a{color:'+mut+' !important;}',
+        '.va-dark .breadcrumb-item.active{color:'+txt+' !important;}',
+        '.va-dark ::-webkit-scrollbar-track{background:'+card+' !important;}',
+        '.va-dark ::-webkit-scrollbar-thumb{background:'+brd+' !important;border-radius:4px !important;}',
+        '.va-dark ::-webkit-scrollbar-thumb:hover{background:'+dac+' !important;}',
+    ].join('');
+}
 function aplicarAlDOM(c) {
     let style = document.getElementById('ventaapp-theme-v2');
     if (!style) {
@@ -881,7 +1313,7 @@ function aplicarAlDOM(c) {
         style.id = 'ventaapp-theme-v2';
         document.head.appendChild(style);
     }
-    style.textContent = buildCSS(c);
+    style.textContent = buildCSS(c) + (isDark ? buildDarkCSS(c, currentDark) : '');
 }
 
 /* ===================================================
@@ -889,19 +1321,32 @@ function aplicarAlDOM(c) {
 =================================================== */
 function aplicarYGuardar() {
     localStorage.setItem('ventaapp_palette_v2', JSON.stringify(current));
+    if (isDark) {
+        localStorage.setItem('ventaapp_dark_palette', JSON.stringify(currentDark));
+    }
     aplicarAlDOM(current);
-    mostrarToast('¡Paleta aplicada en todo el sistema y guardada!');
+    const modoMsg = isDark ? ' 🌙' : '';
+    mostrarToast('¡Paleta aplicada y guardada!' + modoMsg);
 }
 
 function resetearColores() {
     Object.assign(current, DEFAULT);
+    Object.assign(currentDark, DEFAULT_DARK);
+    isDark = false;
+    document.documentElement.classList.remove('va-dark');
+    localStorage.removeItem('ventaapp_dark_mode');
+    localStorage.removeItem('ventaapp_dark_palette');
+    document.getElementById('toggleDarkMode').checked = false;
+    updateDarkUI(false);
     syncAllInputs();
+    syncDarkInputs();
     updatePreview();
     updateCode();
     localStorage.removeItem('ventaapp_palette_v2');
     aplicarAlDOM(current);
     document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
-    mostrarToast('Colores restaurados al predeterminado');
+    document.querySelectorAll('.dark-preset-card').forEach(c => c.classList.remove('active'));
+    mostrarToast('Colores y modo restaurados al predeterminado');
 }
 
 function copiarCodigo() {

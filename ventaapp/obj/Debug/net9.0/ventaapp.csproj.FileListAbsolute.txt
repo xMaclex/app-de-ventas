@@ -158,7 +158,6 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/ref/ventaapp.dll
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/bin/Debug/net9.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/bin/Debug/net9.0/BCrypt.Net-Next.dll
-/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/la28x68yld-{0}-g6e5sn4tig-g6e5sn4tig.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/tc7a9dhkhd-{0}-61n19gt1b8-61n19gt1b8.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/v0bq01zy0n-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/yk1pggx8mt-{0}-bqjiyaj88i-bqjiyaj88i.gz
@@ -223,3 +222,4 @@
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/ee1ruij7of-{0}-pg9mxz5vr5-pg9mxz5vr5.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/pssqurho7g-{0}-pg9mxz5vr5-pg9mxz5vr5.gz
 /Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/swae.build.ex.cache
+/Users/macle/Desktop/Proyecto_de_ventas/ventaapp/obj/Debug/net9.0/compressed/la28x68yld-{0}-rjdbmk13li-rjdbmk13li.gz
