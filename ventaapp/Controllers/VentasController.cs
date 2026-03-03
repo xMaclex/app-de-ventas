@@ -98,13 +98,12 @@ namespace ventaapp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProcesarVenta([FromForm] string? carritoJson, [FromForm] Venta venta)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 // ============================================
                 // 1. VALIDACIONES INICIALES
                 // ============================================
-
-                // Validar carrito
                 if (string.IsNullOrEmpty(carritoJson))
                 {
                     TempData["Error"] = "El carrito está vacío.";
@@ -119,21 +118,24 @@ namespace ventaapp.Controllers
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // Validar cliente
                 if (venta.IdCliente <= 0)
                 {
                     TempData["Error"] = "Debe seleccionar un cliente.";
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                var cliente = await _context.Clientes.FindAsync(venta.IdCliente);
+                // ← CLAVE: AsNoTracking() evita que EF rastree el cliente
+                // y no intente actualizar sus campos relacionados (IdPais, IdCiudad)
+                var cliente = await _context.Clientes
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.IdCliente == venta.IdCliente);
+
                 if (cliente == null)
                 {
                     TempData["Error"] = "El cliente seleccionado no existe.";
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // Validar método de pago
                 if (string.IsNullOrEmpty(venta.MetodoPago))
                 {
                     TempData["Error"] = "Debe seleccionar un método de pago.";
@@ -143,16 +145,21 @@ namespace ventaapp.Controllers
                 // ============================================
                 // 2. VALIDAR STOCK DE TODOS LOS PRODUCTOS
                 // ============================================
-
                 var productosInsuficientes = new List<string>();
+                // Cargar todos los productos del carrito de una sola vez
+                var idsProductos = carrito.Select(i => i.IdProducto).ToList();
+                
+                // ← CLAVE: NO usar AsNoTracking aquí porque necesitamos modificar el stock
+                var productosDb = await _context.Productos
+                    .Where(p => idsProductos.Contains(p.IdProducto))
+                    .ToDictionaryAsync(p => p.IdProducto);
 
                 foreach (var item in carrito)
                 {
-                    var productoDb = await _context.Productos.FindAsync(item.IdProducto);
-                    
-                    if (productoDb == null)
+                    if (!productosDb.TryGetValue(item.IdProducto, out var productoDb))
                     {
                         TempData["Error"] = $"El producto '{item.NombreProducto}' no existe en el sistema.";
+                        await transaction.RollbackAsync();
                         return RedirectToAction(nameof(PuntoVenta));
                     }
 
@@ -166,19 +173,18 @@ namespace ventaapp.Controllers
 
                 if (productosInsuficientes.Any())
                 {
-                    TempData["Error"] = $"Stock insuficiente para los siguientes productos:\\n{string.Join("\\n", productosInsuficientes)}";
+                    TempData["Error"] = $"Stock insuficiente:\n{string.Join("\n", productosInsuficientes)}";
+                    await transaction.RollbackAsync();
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
                 // ============================================
                 // 3. CALCULAR TOTALES
                 // ============================================
-
                 decimal subtotal = carrito.Sum(d => d.Subtotal);
                 decimal itbis = carrito.Sum(d => d.MontoImpuesto);
                 decimal descuento = 0;
 
-                // Calcular descuento
                 if (!string.IsNullOrEmpty(venta.TipoDescuento) && venta.TipoDescuento == "Porcentaje")
                     descuento = subtotal * (venta.Descuento / 100);
                 else if (venta.Descuento > 0)
@@ -186,28 +192,28 @@ namespace ventaapp.Controllers
 
                 decimal total = subtotal + itbis - descuento;
 
-                // Validar que el total sea positivo
                 if (total < 0)
                 {
                     TempData["Error"] = "El total de la venta no puede ser negativo.";
+                    await transaction.RollbackAsync();
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
                 // ============================================
                 // 4. OBTENER USUARIO AUTENTICADO
                 // ============================================
-
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
                 {
                     TempData["Error"] = "No se pudo identificar el usuario autenticado.";
+                    await transaction.RollbackAsync();
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
                 // ============================================
-                // 5. CREAR VENTA (Sin guardar aún)
+                // 5. CREAR Y GUARDAR LA VENTA PRIMERO
+                // ← CLAVE: Guardar antes de crear facturas para obtener el IdVenta real
                 // ============================================
-
                 var nuevaVenta = new Venta
                 {
                     FechaVenta = DateTime.Now,
@@ -219,40 +225,43 @@ namespace ventaapp.Controllers
                     Total = total,
                     MetodoPago = venta.MetodoPago,
                     TipoComprobante = venta.TipoComprobante ?? "Factura",
-                    NumeroComprobante = GenerarNumeroComprobante(),
+                    NumeroComprobante = venta.NumeroComprobante,
                     TipoVenta = venta.TipoVenta ?? "Normal",
                     Notas = venta.Notas ?? string.Empty,
                     Estado = "Completada",
                     IdUsuario = userId
                 };
 
-                // ============================================
-                // 6. AGREGAR A CONTEXTO (Pero no guardar)
-                // ============================================
-
                 _context.Ventas.Add(nuevaVenta);
+                
+                // ← GUARDAR LA VENTA PRIMERO para que EF genere el IdVenta
+                await _context.SaveChangesAsync();
 
                 // ============================================
-                // 7. DESCONTAR STOCK Y CREAR FACTURAS
+                // 6. DESCONTAR STOCK Y CREAR FACTURAS
+                // Ahora nuevaVenta.IdVenta tiene el valor real de la BD
                 // ============================================
-
                 foreach (var item in carrito)
                 {
-                    var productoDb = await _context.Productos.FindAsync(item.IdProducto);
-                    
+                    var productoDb = productosDb[item.IdProducto];
+
                     // Descontar stock
                     productoDb.Stock -= item.Cantidad;
-                    _context.Productos.Update(productoDb);
+                    _context.Entry(productoDb).Property(p => p.Stock).IsModified = true;
+
+                    decimal precioUnitario = item.PrecioUnitario;
+                    decimal montoItbisUnitario = precioUnitario * (item.Impuesto / 100);
 
                     // Crear una factura por cada unidad vendida
                     for (int i = 0; i < item.Cantidad; i++)
                     {
                         var factura = new Factura
                         {
-                            IdVenta = nuevaVenta.IdVenta, // Se asignará cuando se genere el ID
+                            // ← Ahora sí tiene el ID real
+                            IdVenta = nuevaVenta.IdVenta,
                             IdCliente = venta.IdCliente,
                             IdProducto = item.IdProducto,
-                            NumeroFactura = $"F-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
+                            NumeroFactura = $"F-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..8].ToUpper()}",
                             FechaEmision = DateTime.Now,
                             RncEmpresa = "000-00000-0",
                             NombreEmpresa = "VentaApp",
@@ -260,7 +269,10 @@ namespace ventaapp.Controllers
                             Ncf = GenerarNCF(),
                             TipoComprobanteFiscal = venta.TipoComprobante ?? "Factura",
                             Estado = "Activa",
-                            IdUsuario = userId
+                            IdUsuario = userId,
+                            MontoTotal = precioUnitario + montoItbisUnitario,
+                            MontoItbis = montoItbisUnitario,
+                            MotivoAnulacion = string.Empty
                         };
 
                         _context.Facturas.Add(factura);
@@ -268,27 +280,30 @@ namespace ventaapp.Controllers
                 }
 
                 // ============================================
-                // 8. GUARDAR TODO EN UNA SOLA TRANSACCIÓN
+                // 7. GUARDAR FACTURAS Y STOCK, CONFIRMAR TRANSACCIÓN
                 // ============================================
-
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
                 TempData["Success"] = $"Venta #{nuevaVenta.IdVenta} procesada exitosamente.";
                 return RedirectToAction(nameof(Details), new { id = nuevaVenta.IdVenta });
             }
             catch (DbUpdateException dbEx)
             {
-                TempData["Error"] = $"Error de base de datos al procesar la venta: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                await transaction.RollbackAsync();
+                TempData["Error"] = $"Error de base de datos: {dbEx.InnerException?.Message ?? dbEx.Message}";
                 return RedirectToAction(nameof(PuntoVenta));
             }
             catch (JsonException jsonEx)
             {
+                await transaction.RollbackAsync();
                 TempData["Error"] = $"Error al procesar el carrito: {jsonEx.Message}";
                 return RedirectToAction(nameof(PuntoVenta));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Error inesperado al procesar la venta: {ex.Message}";
+                await transaction.RollbackAsync();
+                TempData["Error"] = $"Error inesperado: {ex.Message}";
                 return RedirectToAction(nameof(PuntoVenta));
             }
         }

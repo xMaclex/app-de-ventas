@@ -61,14 +61,14 @@
                             </dl>
                         </div>
                         <div class="col-md-6">
-                            <dl class="row">
+                           <!-- <dl class="row">
                                 <dt class="col-sm-5">Comprobante:</dt>
-                                <dd class="col-sm-7"><code>@Model.NumeroComprobante</code></dd>
+                                <dd class="col-sm-7"><code>@Model.//NumeroComprobante</code></dd>
 
                                 <dt class="col-sm-5">Tipo:</dt>
                                 <dd class="col-sm-7">
-                                    <span class="badge bg-info">@Model.TipoComprobante</span>
-                                </dd>
+                                    <span class="badge bg-info">@Model.//TipoComprobante</span>
+                                </dd> -->
 
                                 <dt class="col-sm-5">Método Pago:</dt>
                                 <dd class="col-sm-7">
@@ -99,13 +99,13 @@
                 <div class="card-body">
                     <dl class="row mb-0">
                         <dt class="col-sm-3">Nombre:</dt>
-                        <dd class="col-sm-9"><strong>@Model.Cliente.NombreCompleto</strong></dd>
+                        <dd class="col-sm-9"><strong>@Model.Cliente?.NombreCompleto</strong></dd>
 
                         <dt class="col-sm-3">Documento:</dt>
-                        <dd class="col-sm-9">@Model.Cliente.TipoDocumento: @Model.Cliente.NumeroDocumento</dd>
+                        <dd class="col-sm-9">@Model.Cliente?.TipoDocumento: @Model.Cliente?.NumeroDocumento</dd>
 
                         <dt class="col-sm-3">Correo:</dt>
-                        <dd class="col-sm-9">@Model.Cliente.CorreoElectronico</dd>
+                        <dd class="col-sm-9">@Model.Cliente?.CorreoElectronico</dd>
                     </dl>
                 </div>
             </div>
@@ -133,12 +133,12 @@
                                     {
                                         <tr>
                                             <td>
-                                                <strong>@factura.Producto.NombreProducto</strong><br>
-                                                <small class="text-muted">Código: @factura.Producto.CodigoProducto</small>
+                                                <strong>@factura.Producto?.NombreProducto</strong><br>
+                                                <small class="text-muted">Código: @factura.Producto?.CodigoProducto</small>
                                             </td>
                                             <td class="text-center">1</td>
-                                            <td class="text-end">$@factura.Producto.PrecioVenta.ToString("N2")</td>
-                                            <td class="text-end">$@factura.Producto.PrecioVenta.ToString("N2")</td>
+                                            <td class="text-end">$@factura.Producto?.PrecioVenta.ToString("N2")</td>
+                                            <td class="text-end">$@factura.Producto?.PrecioVenta.ToString("N2")</td>
                                         </tr>
                                     }
                                 }
@@ -214,7 +214,7 @@
                             <small class="text-muted">+ @(Model.Facturas.Count - 3) más...</small>
                         }
                     </div>
-                </div>
+                </div> 
             }
 
             <!-- Acciones -->
