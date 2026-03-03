@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <!-- Factura (Estilo Comprobante Fiscal) 
+    <!-- Factura (Estilo Comprobante Fiscal) -->
     <div class="row">
         <div class="col-md-12">
             <div class="card border-primary">
@@ -50,7 +50,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                     NCF 
+                    <!-- NCF -->
                     <div class="alert alert-info mb-4">
                         <div class="row">
                             <div class="col-md-6">
@@ -64,7 +64,7 @@
                         </div>
                     </div>
 
-                     Información del Cliente 
+                    <!-- Información del Cliente -->
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <h5 class="border-bottom pb-2"><i class="bi bi-person"></i> Datos del Cliente</h5>
@@ -81,7 +81,7 @@
                         </div>
                     </div>
 
-                     Detalle de Productos 
+                    <!-- Detalle de Productos -->
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <h5 class="border-bottom pb-2"><i class="bi bi-box-seam"></i> Detalle de la Factura</h5>
@@ -97,21 +97,21 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>@Model?.Producto?.CodigoProducto</td>
+                                        <td>@Model.Producto.CodigoProducto</td>
                                         <td>
-                                            <strong>@Model?.Producto:.NombreProducto</strong><br>
-                                            <small class="text-muted">@Model?.Producto?.Descripcion</small>
+                                            <strong>@Model.Producto.NombreProducto</strong><br>
+                                            <small class="text-muted">@Model.Producto.Descripcion</small>
                                         </td>
                                         <td class="text-center">1</td>
-                                        <td class="text-end">$@Model?.Producto?.PrecioVenta.ToString("N2")</td>
-                                        <td class="text-end">$@Model?.Producto?.PrecioVenta.ToString("N2")</td>
+                                        <td class="text-end">$@Model.Producto.PrecioVenta.ToString("N2")</td>
+                                        <td class="text-end">$@Model.Producto.PrecioVenta.ToString("N2")</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Totales 
+                    <!-- Totales -->
                     <div class="row">
                         <div class="col-md-7"></div>
                         <div class="col-md-5">
@@ -121,8 +121,8 @@
                                     <td class="text-end">$@((Model.MontoTotal - Model.MontoItbis).ToString("N2"))</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-end"><strong>ITBIS (@Model?.Producto?.Impuesto%):</strong></td>
-                                    <td class="text-end">$@Model?.MontoItbis.ToString("N2")</td>
+                                    <td class="text-end"><strong>ITBIS (@Model.Producto.Impuesto%):</strong></td>
+                                    <td class="text-end">$@Model.MontoItbis.ToString("N2")</td>
                                 </tr>
                                 <tr class="border-top">
                                     <td class="text-end"><h5>TOTAL:</h5></td>
@@ -132,7 +132,7 @@
                         </div>
                     </div>
 
-                     Estado 
+                    <!-- Estado -->
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <div class="alert @(Model.Estado == "Activa" ? "alert-success" : "alert-danger")">
@@ -153,7 +153,7 @@
                         </div>
                     </div>
 
-                     Notas Legales 
+                    <!-- Notas Legales 
                     <div class="row mt-4">
                         <div class="col-md-12">
                             <small class="text-muted">
