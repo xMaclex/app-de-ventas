@@ -1,0 +1,175 @@
+@model IEnumerable<ventaapp.Models.Clientes>
+
+@{
+    ViewData["Title"] = "Gestión de Clientes";
+}
+
+<div class="container-fluid mt-4">
+    <!-- Header con estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-people-fill"></i> Gestión de Clientes</h2>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Nuevo Cliente
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Clientes</h5>
+                    <h2>@ViewBag.TotalClientes</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Clientes Mostrados</h5>
+                    <h2>@ViewBag.ClientesActivos</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Acciones Rápidas</h5>
+                    <a asp-action="ExportarExcel" class="btn btn-light btn-sm mt-2">
+                        <i class="bi bi-file-excel"></i> Exportar Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de feedback -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill"></i> @TempData["Info"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filtros y búsqueda -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" 
+                               class="form-control" placeholder="Nombre, apellido, documento o correo...">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de Documento</label>
+                        <select name="tipoDocumento" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="Cédula" selected="@(ViewData["TipoDocumentoFilter"]?.ToString() == "Cédula")">Cédula</option>
+                            <option value="RNC" selected="@(ViewData["TipoDocumentoFilter"]?.ToString() == "RNC")">RNC</option>
+                            <option value="Pasaporte" selected="@(ViewData["TipoDocumentoFilter"]?.ToString() == "Pasaporte")">Pasaporte</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de clientes -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Completo</th>
+                            <th>Tipo Doc.</th>
+                            <th>Número Doc.</th>
+                            <th>Correo Electrónico</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var cliente in Model)
+                            {
+                                <tr>
+                                    <td>@cliente.IdCliente</td>
+                                    <td>
+                                        <strong>@cliente.NombreCompleto</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@cliente.TipoDocumento</span>
+                                    </td>
+                                    <td>@cliente.NumeroDocumento</td>
+                                    <td>@cliente.CorreoElectronico</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@cliente.IdCliente" 
+                                               class="btn btn-sm btn-info" title="Ver detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@cliente.IdCliente" 
+                                               class="btn btn-sm btn-warning" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@cliente.IdCliente" 
+                                               class="btn btn-sm btn-danger" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-2">No se encontraron clientes.</p>
+                                    <a asp-action="Create" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle"></i> Crear Primer Cliente
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}

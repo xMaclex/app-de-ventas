@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ventaapp.Models
+namespace ventaapp.Models;
+
+[Table("ventas_tb")]
+public class Venta
 {
-    [Table("ventas_tb")]
-    public class Venta
-    {
         [Key]
         [Column("id_venta")]
         public int IdVenta { get; set; }
@@ -13,7 +13,7 @@ namespace ventaapp.Models
         [Required(ErrorMessage = "La fecha de venta es obligatoria")]
         [Display(Name = "Fecha de Venta")]
         [Column("fecha_venta")]
-        public DateTime Fechaventa { get; set; } = DateTime.Now;
+        public DateTime FechaVenta { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Debe seleccionar un cliente")]
         [Display(Name = "Cliente")]
@@ -90,14 +90,10 @@ namespace ventaapp.Models
         public int IdUsuario { get; set; }
 
         // Relaciones con las tablas
-        public Clientes Cliente { get; set; } = new Clientes();
+        public Clientes? Cliente { get; set; }
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
-        public Usuarios Usuario { get; set; } = new Usuarios();
-        
-        // Propiedades de navegación adicionales (para el carrito)
-        [NotMapped]
-        public List<VentaDetalle> Detalles { get; set; } = new List<VentaDetalle>();
+        public Usuarios? Usuario { get; set; } 
     }
 
     // Clase auxiliar para manejar el detalle de la venta (carrito)
@@ -138,4 +134,3 @@ namespace ventaapp.Models
         }
         public decimal TotalFinal => TotalCarrito - DescuentoCalculado;
     }
-}

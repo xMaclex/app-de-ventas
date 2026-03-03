@@ -20,7 +20,7 @@ public class Ciudad
 
     // Relaciones
     [ForeignKey("IdPais")]
-    public Pais Pais { get; set; } = new Pais();
+    public Pais? Pais { get; set; } = new Pais();
 
     public ICollection<Clientes> Clientes { get; set; } = new List<Clientes>();
 }

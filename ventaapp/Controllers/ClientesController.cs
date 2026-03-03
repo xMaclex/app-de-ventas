@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ventaapp.Data;
-using ventaapp.Models;
-
+using ventaapp.Models;using OfficeOpenXml;
 namespace ventaapp.Controllers
 {
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class ClientesController : Controller
     {
         private readonly VentasDbContext _context;
@@ -57,12 +57,9 @@ namespace ventaapp.Controllers
             }
 
             var cliente = await _context.Clientes
-                .Include(c => c.Pais)
-                .Include(c => c.Ciudad)
                 .Include(c => c.Ventas)
                 .Include(c => c.Facturas)
                 .FirstOrDefaultAsync(m => m.IdCliente == id);
-                
 
             if (cliente == null)
             {
@@ -72,35 +69,23 @@ namespace ventaapp.Controllers
             // Estadísticas del cliente
             ViewBag.TotalCompras = cliente.Ventas.Count;
             ViewBag.TotalGastado = cliente.Ventas.Sum(v => v.Total);
-            ViewBag.UltimaCompra = cliente.Ventas.OrderByDescending(v => v.Fechaventa).FirstOrDefault()?.Fechaventa;
+            ViewBag.UltimaCompra = cliente.Ventas.OrderByDescending(v => v.FechaVenta).FirstOrDefault()?.FechaVenta;
             ViewBag.TicketPromedio = cliente.Ventas.Any() ? cliente.Ventas.Average(v => v.Total) : 0;
 
             return View(cliente);
         }
 
         // GET: Clientes/Create
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            var paises = await _context.Paises.ToListAsync();
-            var ciudades = await _context.Ciudades.ToListAsync();
-            
-            ViewBag.Paises = paises;
-            ViewBag.Ciudades = ciudades;
-            
             return View();
         }
 
         // POST: Clientes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais,IdCiudad")] Clientes cliente)
+        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico")] Clientes cliente)
         {
-            // Cargar datos para los selects en caso de que haya errores
-            var paises = await _context.Paises.ToListAsync();
-            var ciudades = await _context.Ciudades.ToListAsync();
-            ViewBag.Paises = paises;
-            ViewBag.Ciudades = ciudades;
-            
             if (ModelState.IsValid)
             {
                 try
@@ -123,7 +108,7 @@ namespace ventaapp.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, $"Error al crear el cliente: {ex.Message}");
+                    TempData["Error"] = $"Error al crear el cliente: {ex.Message}";
                     return View(cliente);
                 }
             }
@@ -143,20 +128,13 @@ namespace ventaapp.Controllers
             {
                 return NotFound();
             }
-            
-            var paises = await _context.Paises.ToListAsync();
-            var ciudades = await _context.Ciudades.ToListAsync();
-            
-            ViewBag.Paises = paises;
-            ViewBag.Ciudades = ciudades;
-            
             return View(cliente);
         }
 
         // POST: Clientes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais,IdCiudad")] Clientes cliente)
+        public async Task<IActionResult> Edit(int id, [Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico")] Clientes cliente)
         {
             if (id != cliente.IdCliente)
             {
@@ -197,18 +175,9 @@ namespace ventaapp.Controllers
                 catch (Exception ex)
                 {
                     TempData["Error"] = $"Error al actualizar el cliente: {ex.Message}";
-                    var paises = await _context.Paises.ToListAsync();
-                    var ciudades = await _context.Ciudades.ToListAsync();
-                    ViewBag.Paises = paises;
-                    ViewBag.Ciudades = ciudades;
                     return View(cliente);
                 }
             }
-            
-            var paisesError = await _context.Paises.ToListAsync();
-            var ciudadesError = await _context.Ciudades.ToListAsync();
-            ViewBag.Paises = paisesError;
-            ViewBag.Ciudades = ciudadesError;
             return View(cliente);
         }
 
@@ -271,15 +240,41 @@ namespace ventaapp.Controllers
             }
         }
 
-        // Método para exportar a Excel (requiere EPPlus o similar)
+        // Método para exportar a Excel usando EPPlus
         public async Task<IActionResult> ExportarExcel()
         {
             var clientes = await _context.Clientes.ToListAsync();
-            
-            // Aquí irá la lógica de exportación cuando instales EPPlus
-            // Por ahora retorna un mensaje
-            TempData["Info"] = "Función de exportación disponible próximamente.";
-            return RedirectToAction(nameof(Index));
+
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("Clientes");
+                ws.Cells[1,1].Value = "ID";
+                ws.Cells[1,2].Value = "Nombre";
+                ws.Cells[1,3].Value = "Apellidos";
+                ws.Cells[1,4].Value = "TipoDocumento";
+                ws.Cells[1,5].Value = "NumeroDocumento";
+                ws.Cells[1,6].Value = "CorreoElectronico";
+
+                int r = 2;
+                foreach (var c in clientes)
+                {
+                    ws.Cells[r,1].Value = c.IdCliente;
+                    ws.Cells[r,2].Value = c.Nombres;
+                    ws.Cells[r,3].Value = c.Apellidos;
+                    ws.Cells[r,4].Value = c.TipoDocumento;
+                    ws.Cells[r,5].Value = c.NumeroDocumento;
+                    ws.Cells[r,6].Value = c.CorreoElectronico;
+                    r++;
+                }
+
+                ws.Cells[ws.Dimension.Address].AutoFitColumns();
+
+                var ms = new MemoryStream();
+                package.SaveAs(ms);
+                ms.Position = 0;
+                string fname = "Clientes_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                return File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fname);
+            }
         }
 
         private bool ClienteExists(int id)

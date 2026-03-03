@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using ventaapp.Models;
 
 namespace ventaapp.Data;
@@ -67,6 +66,9 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
         //productos
         modelBuilder.Entity<Producto>()
             .HasKey(p => p.IdProducto);
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.Stock)
+            .HasDefaultValue(0);
 
         //ventas
         modelBuilder.Entity<Venta>()
@@ -102,7 +104,7 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(f => f.IdProducto);
 
         modelBuilder.Entity<Factura>()
-            .HasOne(f => f.Venta)
+            .HasOne(f => f.Usuario)
             .WithMany(u => u.Facturas)
             .HasForeignKey(f => f.IdUsuario);
 

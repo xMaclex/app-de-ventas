@@ -46,7 +46,7 @@ public class Clientes
 
     [Required(ErrorMessage = "El país es obligatorio")]
     [Column("id_pais")]
-    public int IdPais { get; set; }
+    public int? IdPais { get; set; }
 
     [Required(ErrorMessage = "La ciudad es obligatoria")]
     [Column("id_ciudad")]
@@ -60,10 +60,10 @@ public class Clientes
    public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
    public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
    
-   [ForeignKey("IdPais")]
+  [ForeignKey("IdPais")]
    public Pais? Pais { get; set; }
    
-   [ForeignKey("IdCiudad")]
+  [ForeignKey("IdCiudad")]
    public Ciudad? Ciudad { get; set; }
 }
 

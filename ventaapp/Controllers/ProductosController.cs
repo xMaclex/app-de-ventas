@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ventaapp.Data;
 using ventaapp.Models;
+using OfficeOpenXml;
 
 namespace ventaapp.Controllers
 {
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class ProductosController : Controller
     {
         private readonly VentasDbContext _context;
@@ -21,7 +23,6 @@ namespace ventaapp.Controllers
             ViewData ["CurrentFilter"] = searchString;
             ViewData ["CategoriaFilter"] = categoria;
             ViewData ["EstadoFilter"] = estado;
-
 
             var productos = from p in _context.Productos 
                 select p;
@@ -56,7 +57,12 @@ namespace ventaapp.Controllers
             ViewBag.ProductosInactivos = await _context.Productos.CountAsync(p => p.Estado == "Inactivo");
             ViewBag.ValorInventario = await _context.Productos
             .Where(p => p.Estado == "Activo")
-            .SumAsync(p => p.PrecioCompra);
+            .SumAsync(p => p.PrecioCompra * p.Stock);
+
+            // alerta de stock bajo (menos de 10 unidades)
+            ViewBag.ProductosStockBajo = await _context.Productos
+                .Where(p => p.Stock < 10 && p.Estado == "Activo")
+                .CountAsync();
 
             //obtener lista de categoria por filtros
             ViewBag.Categorias = await _context.Productos
@@ -101,7 +107,7 @@ namespace ventaapp.Controllers
         //Post producto Greate
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdProducto,CodigoProducto,NombreProducto,Descripcion,Categoria,PrecioCompra,PrecioVenta,Impuesto,Estado" )] Producto producto)
+        public async Task<IActionResult> Create([Bind("IdProducto,CodigoProducto,NombreProducto,Descripcion,Categoria,PrecioCompra,PrecioVenta,Impuesto,Estado,Stock" )] Producto producto)
         {
             if (ModelState.IsValid)
             {
@@ -121,6 +127,13 @@ namespace ventaapp.Controllers
                     if(producto.PrecioVenta <= producto.PrecioCompra)
                     {
                         ModelState.AddModelError("PrecioVenta", "El precio de venta debe ser mayor al precio de compra.");
+                        return View(producto);
+                    }
+
+                    // Además validar el stock no negativo (el modelo ya lo hace pero reforzamos)
+                    if(producto.Stock < 0)
+                    {
+                        ModelState.AddModelError("Stock", "El stock no puede ser negativo.");
                         return View(producto);
                     }
 
@@ -158,7 +171,7 @@ namespace ventaapp.Controllers
         // POST: Productos/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,CodigoProducto,NombreProducto,Descripcion,Categoria,PrecioCompra,PrecioVenta,Impuesto,Estado")] Producto producto)
+        public async Task<IActionResult> Edit(int id, [Bind("IdProducto,CodigoProducto,NombreProducto,Descripcion,Categoria,PrecioCompra,PrecioVenta,Impuesto,Estado,Stock")] Producto producto)
         {
             if (id != producto.IdProducto)
             {
@@ -183,6 +196,13 @@ namespace ventaapp.Controllers
                     if (producto.PrecioVenta <= producto.PrecioCompra)
                     {
                         ModelState.AddModelError("PrecioVenta", "El precio de venta debe ser mayor al precio de compra.");
+                        return View(producto);
+                    }
+
+                    // Validar stock no negativo
+                    if (producto.Stock < 0)
+                    {
+                        ModelState.AddModelError("Stock", "El stock no puede ser negativo.");
                         return View(producto);
                     }
 
@@ -295,15 +315,42 @@ namespace ventaapp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Método para exportar a Excel (requiere EPPlus o similar)
+        // Método para exportar a Excel (requiere EPPlus)
         public async Task<IActionResult> ExportarExcel()
         {
             var productos = await _context.Productos.ToListAsync();
 
-            // Aquí irá la lógica de exportación cuando instales EPPlus
-            // Por ahora retorna un mensaje
-            TempData["Info"] = "Función de exportación disponible próximamente.";
-            return RedirectToAction(nameof(Index));
+            using (var package = new OfficeOpenXml.ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Productos");
+                // encabezados
+                worksheet.Cells[1, 1].Value = "ID";
+                worksheet.Cells[1, 2].Value = "Nombre";
+                worksheet.Cells[1, 3].Value = "Precio Compra";
+                worksheet.Cells[1, 4].Value = "Precio Venta";
+                worksheet.Cells[1, 5].Value = "Stock";
+                worksheet.Cells[1, 6].Value = "Estado";
+
+                int row = 2;
+                foreach (var p in productos)
+                {
+                    worksheet.Cells[row, 1].Value = p.IdProducto;
+                    worksheet.Cells[row, 2].Value = p.NombreProducto;
+                    worksheet.Cells[row, 3].Value = p.PrecioCompra;
+                    worksheet.Cells[row, 4].Value = p.PrecioVenta;
+                    worksheet.Cells[row, 5].Value = p.Stock;
+                    worksheet.Cells[row, 6].Value = p.Estado;
+                    row++;
+                }
+
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+                string filename = "Productos_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filename);
+            }
         }
 
         // Método auxiliar para obtener estadísticas

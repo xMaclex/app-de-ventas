@@ -51,6 +51,13 @@ namespace ventaapp.Controllers
                 return View(model);
             }
 
+            // verify database connectivity before attempting to log in
+            if (!await _context.Database.CanConnectAsync())
+            {
+                ModelState.AddModelError(string.Empty, "No se puede conectar a la base de datos. Intente nuevamente más tarde.");
+                return View(model);
+            }
+
             try
             {
                 // Buscar usuario por username
@@ -169,16 +176,23 @@ namespace ventaapp.Controllers
                 return View(model);
             }
 
+            // Verify database connection early to avoid long hangs
+            if (!await _context.Database.CanConnectAsync())
+            {
+                ModelState.AddModelError(string.Empty, "No se puede conectar a la base de datos. Intente nuevamente más tarde.");
+                return View(model);
+            }
+
             try
             {
-                //valida la foto de perfil
+                // valida la foto de perfil
                 byte[]? fotoPerfilBytes = null;
                 if (model.FotoPerfil != null)
                 {
                     using (var memoryStream = new MemoryStream())
                     {
                         await model.FotoPerfil.CopyToAsync(memoryStream);
-                            fotoPerfilBytes = memoryStream.ToArray();
+                        fotoPerfilBytes = memoryStream.ToArray();
                     }
                 }
 

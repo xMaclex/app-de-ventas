@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ventaapp.Models
+namespace ventaapp.Models;
+
+[Table("facturas_tb")]
+public class Factura
 {
-    [Table("facturas_tb")]
-    public class Factura
-    {
         [Key]
         [Column("id_factura")]
         public int IdFactura { get; set; }
@@ -171,4 +171,3 @@ namespace ventaapp.Models
         [NotMapped]
         public bool Vencida => DateTime.Now > FechaVencimiento;
     }
-}

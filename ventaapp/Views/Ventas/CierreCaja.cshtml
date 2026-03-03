@@ -231,10 +231,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var venta in Model.OrderBy(v => v.Fechaventa))
+                                    @foreach (var venta in Model.OrderBy(v => v.FechaVenta))
                                     {
                                         <tr>
-                                            <td>@venta.Fechaventa.ToString("HH:mm:ss")</td>
+                                            <td>@venta.FechaVenta.ToString("HH:mm:ss")</td>
                                             <td>
                                                 <a asp-action="Details" asp-route-id="@venta.IdVenta">
                                                     #@venta.IdVenta

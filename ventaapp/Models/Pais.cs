@@ -8,7 +8,7 @@ public class Pais
 {
     [Key]
     [Column("id_pais")]
-    public int IdPais { get; set; }
+    public int? IdPais { get; set; }
 
     [Required(ErrorMessage = "El nombre del país es obligatorio")]
     [StringLength(100)]

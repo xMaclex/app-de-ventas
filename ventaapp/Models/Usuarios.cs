@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ventaapp.Models
+namespace ventaapp.Models;
+
+[Table("usuarios_tb")]
+public class Usuarios
 {
-    [Table("usuarios_tb")]
-    public class Usuarios
-    {
         [Key]
         [Column("id_usuarios")]
         public int IdUsuario { get; set; }
@@ -111,4 +111,3 @@ namespace ventaapp.Models
         //[ForeignKey("id_roles")]
        // public Roles? Roles{ get; set; }
     }
-}
