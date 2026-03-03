@@ -46,7 +46,7 @@ public class Clientes
 
     [Required(ErrorMessage = "El país es obligatorio")]
     [Column("id_pais")]
-    public int? IdPais { get; set; }
+    public int IdPais { get; set; }
 
     [Required(ErrorMessage = "La ciudad es obligatoria")]
     [Column("id_ciudad")]

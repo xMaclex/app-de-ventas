@@ -259,7 +259,8 @@ namespace ventaapp.Controllers
                             DireccionEmpresa = "Santo Domingo, RD",
                             Ncf = GenerarNCF(),
                             TipoComprobanteFiscal = venta.TipoComprobante ?? "Factura",
-                            Estado = "Activa"
+                            Estado = "Activa",
+                            IdUsuario = userId
                         };
 
                         _context.Facturas.Add(factura);

@@ -98,10 +98,10 @@ public class Factura
         public int IdUsuario { get; set; }
 
         // Relaciones con las tablas
-        public Venta Venta { get; set; } = new Venta();
-        public Clientes Cliente { get; set; } = new Clientes();
-        public Producto Producto { get; set; } = new Producto();
-        public Usuarios Usuario { get; set; } = new Usuarios();
+        public Venta? Venta { get; set; }
+        public Clientes? Cliente { get; set; }
+        public Producto? Producto { get; set; }
+        public Usuarios? Usuario { get; set; }
 
         // Propiedades calculadas
         [NotMapped]

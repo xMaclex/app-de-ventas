@@ -1,7 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ventaapp.Data;
-using ventaapp.Models;using OfficeOpenXml;
+using ventaapp.Models;
+using OfficeOpenXml;
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
 namespace ventaapp.Controllers
 {
     [Microsoft.AspNetCore.Authorization.Authorize]
@@ -76,15 +87,28 @@ namespace ventaapp.Controllers
         }
 
         // GET: Clientes/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await CargarPaisesYCiudadesAsync();
             return View();
         }
 
         // POST: Clientes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico")] Clientes cliente)
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais, IdCiudad")] Clientes cliente)
+=======
+        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais,IdCiudad")] Clientes cliente)
+>>>>>>> theirs
+=======
+        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais,IdCiudad")] Clientes cliente)
+>>>>>>> theirs
+=======
+        public async Task<IActionResult> Create([Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais,IdCiudad")] Clientes cliente)
+>>>>>>> theirs
         {
             if (ModelState.IsValid)
             {
@@ -97,6 +121,31 @@ namespace ventaapp.Controllers
                     if (existeDocumento)
                     {
                         ModelState.AddModelError("NumeroDocumento", "Ya existe un cliente con este número de documento.");
+                        await CargarPaisesYCiudadesAsync();
+                        return View(cliente);
+                    }
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+                        var ciudadValida = await _context.Ciudades
+=======
+
+                    var ciudadValida = await _context.Ciudades
+>>>>>>> theirs
+=======
+
+                    var ciudadValida = await _context.Ciudades
+>>>>>>> theirs
+=======
+
+                    var ciudadValida = await _context.Ciudades
+>>>>>>> theirs
+                        .AnyAsync(c => c.IdCiudad == cliente.IdCiudad && c.IdPais == cliente.IdPais);
+
+                    if (!ciudadValida)
+                    {
+                        ModelState.AddModelError("IdCiudad", "La ciudad seleccionada no pertenece al país seleccionado.");
+                        await CargarPaisesYCiudadesAsync();
                         return View(cliente);
                     }
 
@@ -109,9 +158,23 @@ namespace ventaapp.Controllers
                 catch (Exception ex)
                 {
                     TempData["Error"] = $"Error al crear el cliente: {ex.Message}";
+                    await CargarPaisesYCiudadesAsync();
                     return View(cliente);
                 }
             }
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
+            await CargarPaisesYCiudadesAsync();
             return View(cliente);
         }
 
@@ -128,13 +191,15 @@ namespace ventaapp.Controllers
             {
                 return NotFound();
             }
+
+            await CargarPaisesYCiudadesAsync();
             return View(cliente);
         }
 
         // POST: Clientes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico")] Clientes cliente)
+        public async Task<IActionResult> Edit(int id, [Bind("IdCliente,Nombres,Apellidos,TipoDocumento,NumeroDocumento,CorreoElectronico,IdPais,IdCiudad")] Clientes cliente)
         {
             if (id != cliente.IdCliente)
             {
@@ -152,6 +217,17 @@ namespace ventaapp.Controllers
                     if (existeDocumento)
                     {
                         ModelState.AddModelError("NumeroDocumento", "Ya existe otro cliente con este número de documento.");
+                        await CargarPaisesYCiudadesAsync();
+                        return View(cliente);
+                    }
+
+                    var ciudadValida = await _context.Ciudades
+                        .AnyAsync(c => c.IdCiudad == cliente.IdCiudad && c.IdPais == cliente.IdPais);
+
+                    if (!ciudadValida)
+                    {
+                        ModelState.AddModelError("IdCiudad", "La ciudad seleccionada no pertenece al país seleccionado.");
+                        await CargarPaisesYCiudadesAsync();
                         return View(cliente);
                     }
 
@@ -175,9 +251,12 @@ namespace ventaapp.Controllers
                 catch (Exception ex)
                 {
                     TempData["Error"] = $"Error al actualizar el cliente: {ex.Message}";
+                    await CargarPaisesYCiudadesAsync();
                     return View(cliente);
                 }
             }
+
+            await CargarPaisesYCiudadesAsync();
             return View(cliente);
         }
 
@@ -275,6 +354,18 @@ namespace ventaapp.Controllers
                 string fname = "Clientes_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
                 return File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fname);
             }
+        }
+
+
+        private async Task CargarPaisesYCiudadesAsync()
+        {
+            ViewBag.Paises = await _context.Paises
+                .OrderBy(p => p.Nombre)
+                .ToListAsync();
+
+            ViewBag.Ciudades = await _context.Ciudades
+                .OrderBy(c => c.Nombre)
+                .ToListAsync();
         }
 
         private bool ClienteExists(int id)
