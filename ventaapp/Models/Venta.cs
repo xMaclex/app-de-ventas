@@ -56,7 +56,7 @@ public class Venta
         [StringLength(20)]
         [Display(Name = "Número de Comprobante")]
         [Column("numero_comprobante")]
-        public string NumeroComprobante { get; set; } = string.Empty;
+        public int NumeroComprobante { get; set; }
 
         [Required(ErrorMessage = "El estado es obligatorio")]
         [StringLength(20)]
@@ -94,6 +94,7 @@ public class Venta
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
         public Usuarios? Usuario { get; set; } 
+        
     }
 
     // Clase auxiliar para manejar el detalle de la venta (carrito)

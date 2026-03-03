@@ -61,14 +61,14 @@
                             </dl>
                         </div>
                         <div class="col-md-6">
-                            <dl class="row">
+                           <!-- <dl class="row">
                                 <dt class="col-sm-5">Comprobante:</dt>
-                                <dd class="col-sm-7"><code>@Model.NumeroComprobante</code></dd>
+                                <dd class="col-sm-7"><code>@Model.//NumeroComprobante</code></dd>
 
                                 <dt class="col-sm-5">Tipo:</dt>
                                 <dd class="col-sm-7">
-                                    <span class="badge bg-info">@Model.TipoComprobante</span>
-                                </dd>
+                                    <span class="badge bg-info">@Model.//TipoComprobante</span>
+                                </dd> -->
 
                                 <dt class="col-sm-5">Método Pago:</dt>
                                 <dd class="col-sm-7">
@@ -195,27 +195,7 @@
             </div>
 
             <!-- Comprobante Fiscal -->
-            @if (Model.Facturas.Any())
-            {
-                <div class="card mb-4">
-                    <div class="card-header bg-warning">
-                        <h6 class="mb-0"><i class="bi bi-file-earmark-text"></i> Comprobantes Fiscales</h6>
-                    </div>
-                    <div class="card-body">
-                        @foreach (var factura in Model.Facturas.Take(3))
-                        {
-                            <div class="mb-2">
-                                <strong>@factura.NumeroFactura</strong><br>
-                                <small>NCF: @factura.Ncf</small>
-                            </div>
-                        }
-                        @if (Model.Facturas.Count > 3)
-                        {
-                            <small class="text-muted">+ @(Model.Facturas.Count - 3) más...</small>
-                        }
-                    </div>
-                </div>
-            }
+           
 
             <!-- Acciones -->
             @if (Model.Estado == "Completada")

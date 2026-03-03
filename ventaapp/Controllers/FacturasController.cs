@@ -216,14 +216,14 @@ namespace ventaapp.Controllers
             }
         }
 
-        // GET: Facturas/GestionNCF
+        /*/ GET: Facturas/GestionNCF
         public IActionResult GestionNCF()
         {
             // Por ahora retorna vista vacía
             // En implementación completa, aquí se gestionarían las secuencias de NCF
             TempData["Info"] = "La gestión de secuencias NCF se implementará próximamente.";
             return View();
-        }
+        } */
 
         // GET: Facturas/DescargarPDF/5
         public async Task<IActionResult> DescargarPDF(int? id)
@@ -263,7 +263,7 @@ namespace ventaapp.Controllers
 
                 // Aquí se implementaría el envío por correo
                 // Por ahora solo muestra mensaje
-                TempData["Info"] = $"El envío de facturas por correo se implementará próximamente. Se enviaría a: {factura.Cliente.CorreoElectronico}";
+                TempData["Info"] = $"El envío de facturas por correo se implementará próximamente. Se enviaría a: {factura?.Cliente?.CorreoElectronico}";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
@@ -284,7 +284,7 @@ namespace ventaapp.Controllers
             if (!ncf.StartsWith(tipo))
                 return false;
 
-            return true;
-        }
+            return true; 
+        } 
     }
 }

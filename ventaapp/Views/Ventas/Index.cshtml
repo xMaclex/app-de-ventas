@@ -167,6 +167,9 @@
                         </tr>
                     </thead>
                     <tbody>
+
+
+
                         @if (Model != null && Model.Any())
                         {
                             @foreach (var venta in Model)
@@ -174,32 +177,32 @@
                                 <tr>
                                     <td><strong>#@venta.IdVenta</strong></td>
                                     <td>@venta.FechaVenta.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@venta.Cliente.NombreCompleto</td>
-                                    <td><code>@venta.NumeroComprobante</code></td>
-                                    <td class="text-end"><strong>$@venta.Total.ToString("N2")</strong></td>
+                                    <td>@venta?.Cliente?.NombreCompleto</td>
+                                    
+                                    <td class="text-end"><strong>$@venta?.Total.ToString("N2")</strong></td>
                                     <td>
-                                        <span class="badge bg-info">@venta.MetodoPago</span>
+                                        <span class="badge bg-info">@venta?.MetodoPago</span>
                                     </td>
                                     <td>
-                                        @if (venta.Estado == "Completada")
+                                        @if (venta?.Estado == "Completada")
                                         {
                                             <span class="badge bg-success">@venta.Estado</span>
                                         }
-                                        else if (venta.Estado == "Anulada")
+                                        else if (venta?.Estado == "Anulada")
                                         {
-                                            <span class="badge bg-danger">@venta.Estado</span>
+                                            <span class="badge bg-danger">@venta?.Estado</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-warning">@venta.Estado</span>
+                                            <span class="badge bg-warning">@venta?.Estado</span>
                                         }
                                     </td>
                                     <td class="text-center">
-                                        <a asp-action="Details" asp-route-id="@venta.IdVenta" 
+                                        <a asp-action="Details" asp-route-id="@venta?.IdVenta" 
                                            class="btn btn-sm btn-info" title="Ver detalles">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        @if (venta.Estado == "Completada")
+                                        @if (venta?.Estado == "Completada")
                                         {
                                             <button type="button" class="btn btn-sm btn-danger" 
                                                     onclick="anularVenta(@venta.IdVenta)" title="Anular">
