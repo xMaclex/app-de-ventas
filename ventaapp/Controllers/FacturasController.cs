@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ventaapp.Data;
 using ventaapp.Models;
+using OfficeOpenXml;
 
 namespace ventaapp.Controllers
 {
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class FacturasController : Controller
     {
         private readonly VentasDbContext _context;
@@ -166,6 +168,52 @@ namespace ventaapp.Controllers
                 .ToList();
 
             return View(facturas);
+        }
+
+        // GET: Facturas/ExportarReporte607
+        public async Task<IActionResult> ExportarReporte607(int mes, int año)
+        {
+            if (mes == 0) mes = DateTime.Now.Month;
+            if (año == 0) año = DateTime.Now.Year;
+
+            var facturas = await _context.Facturas
+                .Include(f => f.Cliente)
+                .Include(f => f.Producto)
+                .Where(f => f.FechaEmision.Month == mes &&
+                           f.FechaEmision.Year == año &&
+                           f.Estado == "Activa")
+                .OrderBy(f => f.FechaEmision)
+                .ToListAsync();
+
+            using (var pkg = new ExcelPackage())
+            {
+                var ws = pkg.Workbook.Worksheets.Add("Reporte607");
+                // headers
+                ws.Cells[1,1].Value = "ID";
+                ws.Cells[1,2].Value = "Fecha";
+                ws.Cells[1,3].Value = "Cliente";
+                ws.Cells[1,4].Value = "TipoComprobante";
+                ws.Cells[1,5].Value = "MontoTotal";
+                ws.Cells[1,6].Value = "MontoItbis";
+
+                int r = 2;
+                foreach (var f in facturas)
+                {
+                    ws.Cells[r,1].Value = f.IdFactura;
+                    ws.Cells[r,2].Value = f.FechaEmision.ToString("yyyy-MM-dd");
+                    ws.Cells[r,3].Value = f.Cliente?.Nombres + " " + f.Cliente?.Apellidos;
+                    ws.Cells[r,4].Value = f.TipoComprobanteFiscal;
+                    ws.Cells[r,5].Value = f.MontoTotal;
+                    ws.Cells[r,6].Value = f.MontoItbis;
+                    r++;
+                }
+                ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                var ms = new MemoryStream();
+                pkg.SaveAs(ms);
+                ms.Position = 0;
+                string fname = $"Reporte607_{mes}_{año}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+                return File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fname);
+            }
         }
 
         // GET: Facturas/GestionNCF

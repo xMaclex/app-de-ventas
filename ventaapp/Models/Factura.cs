@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ventaapp.Models
+namespace ventaapp.Models;
+
+[Table("facturas_tb")]
+public class Factura
 {
-    [Table("facturas_tb")]
-    public class Factura
-    {
         [Key]
         [Column("id_factura")]
         public int IdFactura { get; set; }
@@ -98,10 +98,10 @@ namespace ventaapp.Models
         public int IdUsuario { get; set; }
 
         // Relaciones con las tablas
-        public Venta Venta { get; set; } = new Venta();
-        public Clientes Cliente { get; set; } = new Clientes();
-        public Producto Producto { get; set; } = new Producto();
-        public Usuarios Usuario { get; set; } = new Usuarios();
+        public Venta? Venta { get; set; }
+        public Clientes? Cliente { get; set; }
+        public Producto? Producto { get; set; }
+        public Usuarios? Usuario { get; set; }
 
         // Propiedades calculadas
         [NotMapped]
@@ -171,4 +171,3 @@ namespace ventaapp.Models
         [NotMapped]
         public bool Vencida => DateTime.Now > FechaVencimiento;
     }
-}

@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Drawing;
 
-namespace ventaapp.Models
+namespace ventaapp.Models;
+
+[Table("productos_tb")]
+public class Producto
 {
-    [Table("productos_tb")]
-    public class Producto
-    {
         [Key]
         [Column("id_producto")]
         public int IdProducto { get; set; }
@@ -59,6 +60,12 @@ namespace ventaapp.Models
         [Column("estado")]
         public string Estado { get; set; } = "Activo";
 
+        [Required(ErrorMessage = "La cantidad en inventario es obligatoria")]
+        [Range(0, int.MaxValue, ErrorMessage = "El stock debe ser un número entero mayor o igual a 0")]
+        [Display(Name = "Stock")]        
+        [Column("stock")]
+        public int Stock { get; set; } = 0;
+
         // Propiedades calculadas (no mapeadas)
         [NotMapped]
         [Display(Name = "Margen de Ganancia")]
@@ -76,4 +83,3 @@ namespace ventaapp.Models
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
     }
-}

@@ -147,11 +147,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+<<<<<<< HEAD
                                     @foreach (var venta in Model.Ventas.OrderByDescending(v => v.Fechaventa))
                                     {
                                         <tr>
                                             <td>@venta.IdVenta</td>
                                             <td>@venta.Fechaventa.ToString("dd/MM/yyyy HH:mm")</td>
+=======
+                                    @foreach (var venta in Model.Ventas.OrderByDescending(v => v.FechaVenta))
+                                    {
+                                        <tr>
+                                            <td>@venta.IdVenta</td>
+                                            <td>@venta.FechaVenta.ToString("dd/MM/yyyy HH:mm")</td>
+>>>>>>> develop
                                             <td>$@venta.Subtotal.ToString("N2")</td>
                                             <td>$@venta.Itbis.ToString("N2")</td>
                                             <td><strong>$@venta.Total.ToString("N2")</strong></td>

@@ -1,8 +1,35 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p> <h5> Pagina Principal en mantenimiento, Proximamente disponible</h5> </p>
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="card-title">Ventas Hoy</h6>
+                    <h2>@ViewBag.VentasHoy</h2>
+                    <small>Transacciones completadas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6 class="card-title">Total Hoy</h6>
+                    <h2>$@ViewBag.TotalHoy.ToString("N2")</h2>
+                    <small>Ingresos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title">Productos Stock Bajo</h6>
+                    <h2>@ViewBag.ProductosStockBajo</h2>
+                    <small>&lt;10 unidades</small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

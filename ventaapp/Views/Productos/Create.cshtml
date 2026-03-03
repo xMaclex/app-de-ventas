@@ -103,6 +103,13 @@
                                     <small class="text-muted">ITBIS en República Dominicana: 18%</small>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label asp-for="Stock" class="form-label"></label>
+                                    <input asp-for="Stock" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="Stock" class="text-danger"></span>
+                                    <small class="text-muted">Cantidad disponible en inventario</small>
+                                </div>
+
                                 <!-- Tarjeta de Cálculos -->
                                 <div class="card bg-light mt-4">
                                     <div class="card-body">

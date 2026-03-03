@@ -236,7 +236,7 @@
                                                     #@venta.IdVenta
                                                 </a>
                                             </td>
-                                            <td>@venta.Fechaventa.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@venta.FechaVenta.ToString("dd/MM/yyyy HH:mm")</td>
                                             <td>@venta.Cliente.NombreCompleto</td>
                                             <td><span class="badge bg-info">@venta.MetodoPago</span></td>
                                             <td class="text-end"><strong>$@venta.Total.ToString("N2")</strong></td>
@@ -268,7 +268,7 @@
     <script>
         // Datos para el gráfico
         var ventasPorDia = @Html.Raw(Json.Serialize(
-            Model.GroupBy(v => v.Fechaventa.Date)
+            Model.GroupBy(v => v.FechaVenta.Date)
                  .Select(g => new { 
                      Fecha = g.Key.ToString("dd/MM"), 
                      Total = g.Sum(v => v.Total) 

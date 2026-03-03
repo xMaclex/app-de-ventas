@@ -31,7 +31,7 @@
             <form asp-action="Reporte607" method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label">Mes:</label>
-                    <select name="mes" class="form-select">
+                    <select id="mes" name="mes" class="form-select">
                         @for (int i = 1; i <= 12; i++)
                         {
                             <option value="@i" selected="@(i == ViewBag.Mes)">
@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Año:</label>
-                    <select name="año" class="form-select">
+                    <select id="año" name="año" class="form-select">
                         @for (int i = DateTime.Now.Year; i >= DateTime.Now.Year - 5; i--)
                         {
                             <option value="@i" selected="@(i == ViewBag.Año)">@i</option>
@@ -270,7 +270,10 @@
     
     <script>
         function exportarExcel() {
-            alert('La funcionalidad de exportación a Excel se implementará próximamente.\n\nPor ahora puede usar la función de imprimir y guardar como PDF.');
+            // tomar los valores de mes y año del formulario (si existen)
+            var mes = document.getElementById('mes').value || 0;
+            var año = document.getElementById('año').value || 0;
+            window.location = '/Facturas/ExportarReporte607?mes=' + mes + '&año=' + año;
         }
     </script>
 

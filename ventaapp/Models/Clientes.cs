@@ -60,10 +60,10 @@ public class Clientes
    public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
    public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
    
-   [ForeignKey("IdPais")]
+  [ForeignKey("IdPais")]
    public Pais? Pais { get; set; }
    
-   [ForeignKey("IdCiudad")]
+  [ForeignKey("IdCiudad")]
    public Ciudad? Ciudad { get; set; }
 }
 

@@ -6,6 +6,7 @@ using ventaapp.ViewModels;
 
 namespace ventaapp.Controllers
 {
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class UsuariosController : Controller
     {
         private readonly VentasDbContext _context;

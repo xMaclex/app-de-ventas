@@ -226,11 +226,12 @@
                     <a href="#" class="list-group-item list-group-item-action" 
                        onclick="agregarAlCarrito(${producto.idProducto}, '${producto.codigoProducto}', 
                                                  '${producto.nombreProducto}', ${producto.precioVenta}, 
-                                                 ${producto.impuesto}); return false;">
+                                                 ${producto.impuesto}, ${producto.stock}); return false;">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>${producto.nombreProducto}</strong><br>
-                                <small class="text-muted">Código: ${producto.codigoProducto}</small>
+                                <small class="text-muted">Código: ${producto.codigoProducto}</small><br>
+                                <small class="text-warning">Stock: ${producto.stock}</small>
                             </div>
                             <div class="text-end">
                                 <h5 class="mb-0 text-success">$${producto.precioVenta.toFixed(2)}</h5>
@@ -246,12 +247,16 @@
         }
         
         // Agregar producto al carrito
-        function agregarAlCarrito(idProducto, codigo, nombre, precio, impuesto) {
+        function agregarAlCarrito(idProducto, codigo, nombre, precio, impuesto, stock) {
             // Verificar si el producto ya está en el carrito
             const itemExistente = carrito.find(item => item.IdProducto === idProducto);
             
             if (itemExistente) {
-                itemExistente.Cantidad++;
+                if (itemExistente.Cantidad < stock) {
+                    itemExistente.Cantidad++;
+                } else {
+                    alert('No hay suficiente stock disponible');
+                }
             } else {
                 carrito.push({
                     IdProducto: idProducto,
@@ -259,7 +264,8 @@
                     NombreProducto: nombre,
                     PrecioUnitario: precio,
                     Cantidad: 1,
-                    Impuesto: impuesto
+                    Impuesto: impuesto,
+                    Stock: stock
                 });
             }
             
@@ -296,7 +302,7 @@
                                 <button class="btn btn-outline-secondary" type="button" 
                                         onclick="cambiarCantidad(${index}, -1)">-</button>
                                 <input type="number" class="form-control text-center" 
-                                       value="${item.Cantidad}" min="1" 
+                                       value="${item.Cantidad}" min="1" max="${item.Stock}"
                                        onchange="actualizarCantidad(${index}, this.value)">
                                 <button class="btn btn-outline-secondary" type="button" 
                                         onclick="cambiarCantidad(${index}, 1)">+</button>
@@ -329,11 +335,15 @@
         
         // Actualizar cantidad
         function actualizarCantidad(index, nuevaCantidad) {
-            const cantidad = parseInt(nuevaCantidad);
-            if (cantidad > 0) {
-                carrito[index].Cantidad = cantidad;
-                actualizarCarrito();
+            let cantidad = parseInt(nuevaCantidad);
+            if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
+            const stock = carrito[index].Stock || 0;
+            if (cantidad > stock) {
+                alert('No hay suficiente stock disponible');
+                cantidad = stock;
             }
+            carrito[index].Cantidad = cantidad;
+            actualizarCarrito();
         }
         
         // Eliminar del carrito

@@ -590,3 +590,8 @@ Este es el módulo más completo del sistema e incluye:
 - ✅ **Validaciones** completas
 
 ¡Ahora tienes un sistema de punto de venta completo y profesional!
+
+
+## conecxion mediante SQLite .json
+
+"DefaultConnection": "server=127.0.0.1;port=3306;database=ventas_db;user=root;password=Elmejorde1!;AllowPublicKeyRetrieval=True;SslMode=none;"
