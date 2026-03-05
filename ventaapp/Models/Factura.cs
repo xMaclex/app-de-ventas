@@ -66,6 +66,10 @@ public class Factura
         [Column("tipo_comprobante_fiscal")]
         public string TipoComprobanteFiscal { get; set; } = string.Empty;
 
+        [Display(Name = "Número Actual")]
+        [Column("numero_comprobante")]
+        public int NumeroComprobante { get; set; }
+
         [Required(ErrorMessage = "El estado es obligatorio")]
         [StringLength(20)]
         [Display(Name = "Estado")]
@@ -102,6 +106,9 @@ public class Factura
         public Clientes? Cliente { get; set; }
         public Producto? Producto { get; set; }
         public Usuarios? Usuario { get; set; }
+        public SecuenciaNcf? SecuenciaNcf { get; set; }
+
+
 
         // Propiedades calculadas
         [NotMapped]
@@ -135,7 +142,7 @@ public class Factura
         }
     }
 
-    // Clase para gestión de secuencias de NCF
+    /*/ Clase para gestión de secuencias de NCF
     public class SecuenciaNcf
     {
         [Key]
@@ -170,4 +177,8 @@ public class Factura
 
         [NotMapped]
         public bool Vencida => DateTime.Now > FechaVencimiento;
+
+        
     }
+
+    */

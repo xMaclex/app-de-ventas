@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ventaapp.Data;
 using ventaapp.Models;
-
 using OfficeOpenXml;
+
 namespace ventaapp.Controllers
 {
     [Microsoft.AspNetCore.Authorization.Authorize]

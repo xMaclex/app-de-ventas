@@ -1,0 +1,67 @@
+@model ventaapp.Models.SecuenciaNcf
+
+@{
+    ViewData["Title"] = "Editar Secuencia NCF";
+}
+
+<div class="container mt-4" style="max-width: 760px;">
+    <h3 class="mb-3"><i class="bi bi-pencil-square"></i> Editar Secuencia NCF</h3>
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <form asp-action="Editar" asp-route-id="@Model.IdSecuencia" method="post" class="card">
+        <div class="card-body">
+            <input asp-for="IdSecuencia" type="hidden" />
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="TipoComprobante" class="form-label"></label>
+                    <select asp-for="TipoComprobante" class="form-select">
+                        <option value="B01">B01 - Crédito Fiscal</option>
+                        <option value="B02">B02 - Consumidor Final</option>
+                        <option value="B14">B14 - Régimen Especial</option>
+                        <option value="B15">B15 - Gubernamental</option>
+                    </select>
+                    <span asp-validation-for="TipoComprobante" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="FechaVencimiento" class="form-label"></label>
+                    <input asp-for="FechaVencimiento" type="date" class="form-control" />
+                    <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="NumeroInicial" class="form-label"></label>
+                    <input asp-for="NumeroInicial" class="form-control" />
+                    <span asp-validation-for="NumeroInicial" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="NumeroActual" class="form-label"></label>
+                    <input asp-for="NumeroActual" class="form-control" />
+                    <span asp-validation-for="NumeroActual" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="NumeroFinal" class="form-label"></label>
+                    <input asp-for="NumeroFinal" class="form-control" />
+                    <span asp-validation-for="NumeroFinal" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 form-check mt-2 ms-2">
+                    <input asp-for="Activa" class="form-check-input" />
+                    <label asp-for="Activa" class="form-check-label"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
