@@ -94,6 +94,8 @@ public class Venta
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
         public Usuarios? Usuario { get; set; } 
+        public SecuenciaNcf? SecuenciaNcf { get; set; }
+
         
     }
 

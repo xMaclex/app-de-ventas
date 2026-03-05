@@ -233,6 +233,33 @@ namespace ventaapp.Controllers
                 };
 
                 _context.Ventas.Add(nuevaVenta);
+
+                string tipoNcf = (cliente.TipoDocumento == "RNC") ? "B01" : "B02";
+
+                var secuenciaNcf = await _context.SecuenciaNcf
+                    .Where(s => s.TipoComprobante == tipoNcf && s.Activa && !s.Vencida && !s.Agotada)
+                    .FirstOrDefaultAsync();
+
+                if (secuenciaNcf == null)
+                    {
+                        TempData["Error"] = $"No hay secuencia NCF activa para el tipo {tipoNcf}. " +
+                                            "Configure una en Configuración → Comprobantes Fiscales (NCF).";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction(nameof(PuntoVenta));
+                    }
+
+                // Un solo NCF por venta (aunque tenga varios productos/facturas)
+                string? ncfGenerado = secuenciaNcf.GenerarProximoNcf();
+                if (ncfGenerado == null)
+                {
+                    TempData["Error"] = "La secuencia NCF está agotada o vencida. Configure una nueva secuencia.";
+                    await transaction.RollbackAsync();
+                    return RedirectToAction(nameof(PuntoVenta));
+                }
+
+                    
+
+
                 
                 // ← GUARDAR LA VENTA PRIMERO para que EF genere el IdVenta
                 await _context.SaveChangesAsync();
@@ -266,7 +293,7 @@ namespace ventaapp.Controllers
                             RncEmpresa = "000-00000-0",
                             NombreEmpresa = "VentaApp",
                             DireccionEmpresa = "Santo Domingo, RD",
-                            Ncf = GenerarNCF(),
+                            //Ncf = GenerarNCF(),
                             TipoComprobanteFiscal = venta.TipoComprobante ?? "Factura",
                             Estado = "Activa",
                             IdUsuario = userId,
@@ -423,7 +450,7 @@ namespace ventaapp.Controllers
             ViewBag.TopClientes = ventas
                 .GroupBy(v => v.Cliente)
                 .Select(g => new { 
-                    Cliente = g.Key.NombreCompleto, 
+                    Cliente = g.Key?.NombreCompleto, 
                     Cantidad = g.Count(), 
                     Total = g.Sum(v => v.Total) 
                 })
@@ -462,7 +489,7 @@ namespace ventaapp.Controllers
             return $"V-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
         }
 
-        // Método auxiliar para generar NCF (simulado)
+        /*/ Método auxiliar para generar NCF (simulado)
         private string GenerarNCF()
         {
             // En producción, esto debería conectarse con el sistema de la DGII
@@ -470,7 +497,7 @@ namespace ventaapp.Controllers
             {
                 return $"B01{DateTime.Now:yyyyMMdd}{_random.Next(10000000, 99999999)}";
             }
-        }
+        } */
 
         // API: Buscar producto
         [HttpGet]

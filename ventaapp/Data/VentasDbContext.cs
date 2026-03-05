@@ -17,6 +17,8 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
         public DbSet<Ciudad> Ciudades { get; set; }
         public DbSet<Usuarios> Usuario { get; set; }
        // public DbSet<Roles> Roles { get; set; }
+       public DbSet<SecuenciaNcf> SecuenciaNcf { get; set; }
+
 
 
 
@@ -35,6 +37,11 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(u => u.Roles)
             .WithMany(r => r.Usuarios)
             .HasForeignKey(u => u.IdRoles); */
+
+
+            //NCF
+        modelBuilder.Entity<SecuenciaNcf>()
+            .HasIndex(s => s.NumeroComprobante);
 
         //Paises
         modelBuilder.Entity<Pais>()
@@ -84,6 +91,11 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.Ventas)
             .HasForeignKey(v => v.IdUsuario);
 
+        modelBuilder.Entity<Venta>()
+            .HasOne(v => v.SecuenciaNcf)
+            .WithMany(s => s.Ventas)
+            .HasForeignKey(v => v.NumeroComprobante);
+
         //Facturas
         modelBuilder.Entity<Factura>()
             .HasKey(f => f.IdFactura);
@@ -107,6 +119,18 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(f => f.Usuario)
             .WithMany(u => u.Facturas)
             .HasForeignKey(f => f.IdUsuario);
+
+        modelBuilder.Entity<Factura>()
+            .HasOne(f => f.SecuenciaNcf)
+            .WithMany(s => s.Facturas)
+            .HasForeignKey(f => f.NumeroComprobante);
+
+
+
+
+        
+
+
 
         //Roles
        // modelBuilder.Entity<Roles>()
