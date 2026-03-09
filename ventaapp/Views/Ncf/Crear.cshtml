@@ -4,63 +4,124 @@
     ViewData["Title"] = "Nueva Secuencia NCF";
 }
 
-<div class="container mt-4" style="max-width: 760px;">
-    <h3 class="mb-3"><i class="bi bi-plus-circle"></i> Nueva Secuencia NCF</h3>
+<div class="container mt-4" style="max-width:640px;">
 
-    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-plus-circle me-2" style="color:#4f8ef7;"></i>Nueva Secuencia NCF
+            </h3>
+            <small class="text-muted">Configure un nuevo rango de comprobantes fiscales</small>
+        </div>
+    </div>
 
-    <form asp-action="Crear" method="post" class="card">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="TipoComprobante" class="form-label"></label>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form asp-action="Crear" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Tipo de comprobante -->
+                <div class="mb-4">
+                    <label asp-for="TipoComprobante" class="form-label fw-semibold">
+                        Tipo de Comprobante <span class="text-danger">*</span>
+                    </label>
                     <select asp-for="TipoComprobante" class="form-select">
-                        <option value="B01">B01 - Crédito Fiscal</option>
-                        <option value="B02">B02 - Consumidor Final</option>
-                        <option value="B14">B14 - Régimen Especial</option>
-                        <option value="B15">B15 - Gubernamental</option>
+                        <option value="">-- Seleccione tipo --</option>
+                        <option value="B01">B01 – Crédito Fiscal</option>
+                        <option value="B02">B02 – Consumidor Final</option>
+                        <option value="B14">B14 – Régimen Especial</option>
+                        <option value="B15">B15 – Gubernamental</option>
                     </select>
-                    <span asp-validation-for="TipoComprobante" class="text-danger"></span>
+                    <span asp-validation-for="TipoComprobante" class="text-danger small"></span>
+                    <div class="form-text">Seleccione el tipo que le fue autorizado por la DGII.</div>
                 </div>
 
-                <div class="col-md-6">
-                    <label asp-for="FechaVencimiento" class="form-label"></label>
-                    <input asp-for="FechaVencimiento" type="date" class="form-control" />
-                    <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
+                <!-- Rango -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label asp-for="NumeroInicial" class="form-label fw-semibold">
+                            Número Inicial <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="NumeroInicial" type="number" class="form-control" min="1" />
+                        <span asp-validation-for="NumeroInicial" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="NumeroFinal" class="form-label fw-semibold">
+                            Número Final <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="NumeroFinal" type="number" class="form-control" min="2" />
+                        <span asp-validation-for="NumeroFinal" class="text-danger small"></span>
+                    </div>
                 </div>
 
-                <div class="col-md-4">
-                    <label asp-for="NumeroInicial" class="form-label"></label>
-                    <input asp-for="NumeroInicial" class="form-control" />
-                    <span asp-validation-for="NumeroInicial" class="text-danger"></span>
+                <!-- Vista previa del primer NCF -->
+                <div class="mb-4 p-3 bg-light rounded">
+                    <small class="text-muted d-block mb-1">Vista previa del primer comprobante:</small>
+                    <code id="ncfPreview" class="fs-6 text-primary">─</code>
                 </div>
 
-                <div class="col-md-4">
-                    <label asp-for="NumeroFinal" class="form-label"></label>
-                    <input asp-for="NumeroFinal" class="form-control" />
-                    <span asp-validation-for="NumeroFinal" class="text-danger"></span>
+                <!-- Fecha de vencimiento -->
+                <div class="mb-4">
+                    <label asp-for="FechaVencimiento" class="form-label fw-semibold">
+                        Fecha de Vencimiento <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="FechaVencimiento" type="date" class="form-control"
+                           min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="FechaVencimiento" class="text-danger small"></span>
+                    <div class="form-text">Fecha indicada en la autorización de la DGII.</div>
                 </div>
 
-                <div class="col-md-4">
-                    <label asp-for="NumeroActual" class="form-label"></label>
-                    <input asp-for="NumeroActual" class="form-control" />
-                    <span asp-validation-for="NumeroActual" class="text-danger"></span>
+                <!-- Activa -->
+                <div class="mb-4 form-check form-switch">
+                    <input asp-for="Activa" class="form-check-input" role="switch" id="activaSwitch" />
+                    <label class="form-check-label" for="activaSwitch">
+                        Activar inmediatamente
+                    </label>
+                    <div class="form-text text-warning">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        Solo puede haber una secuencia activa por tipo. Si existe una activa del mismo tipo, no podrá activar esta.
+                    </div>
                 </div>
 
-                <div class="col-12 form-check mt-2 ms-2">
-                    <input asp-for="Activa" class="form-check-input" />
-                    <label asp-for="Activa" class="form-check-label"></label>
+                <hr />
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-save me-1"></i> Guardar Secuencia
+                    </button>
                 </div>
-            </div>
+
+            </form>
         </div>
-
-        <div class="card-footer d-flex justify-content-between">
-            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
-            <button type="submit" class="btn btn-primary">Guardar Secuencia</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function updatePreview() {
+            const tipo = document.querySelector('[name="TipoComprobante"]').value;
+            const inicio = document.querySelector('[name="NumeroInicial"]').value;
+            const el = document.getElementById('ncfPreview');
+            if (tipo && inicio) {
+                el.textContent = tipo + String(inicio).padStart(10, '0');
+            } else {
+                el.textContent = '─';
+            }
+        }
+        document.querySelector('[name="TipoComprobante"]').addEventListener('change', updatePreview);
+        document.querySelector('[name="NumeroInicial"]').addEventListener('input', updatePreview);
+    </script>
 }

@@ -9,45 +9,29 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
     public VentasDbContext(DbContextOptions<VentasDbContext> options) : base(options)
     {
     }
-        public DbSet<Clientes> Clientes { get; set; }
-        public DbSet<Producto> Productos { get; set; } 
-        public DbSet<Venta> Ventas { get; set; }
-        public DbSet<Factura> Facturas { get; set; }
-        public DbSet<Pais> Paises { get; set; }
-        public DbSet<Ciudad> Ciudades { get; set; }
-        public DbSet<Usuarios> Usuario { get; set; }
-       // public DbSet<Roles> Roles { get; set; }
-       public DbSet<SecuenciaNcf> SecuenciaNcf { get; set; }
 
+    public DbSet<Clientes>     Clientes     { get; set; }
+    public DbSet<Producto>     Productos    { get; set; }
+    public DbSet<Venta>        Ventas       { get; set; }
+    public DbSet<Factura>      Facturas     { get; set; }
+    public DbSet<Pais>         Paises       { get; set; }
+    public DbSet<Ciudad>       Ciudades     { get; set; }
+    public DbSet<Usuarios>     Usuario      { get; set; }
+    public DbSet<SecuenciaNcf> SecuenciaNcf { get; set; }
 
-
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-
-        //configuracion de cada tabla
-
-        //Usuarios
+        // ── Usuarios ──────────────────────────────────────────────────
         modelBuilder.Entity<Usuarios>()
             .HasKey(u => u.IdUsuario);
 
-       /* modelBuilder.Entity<Usuarios>()
-            .HasOne(u => u.Roles)
-            .WithMany(r => r.Usuarios)
-            .HasForeignKey(u => u.IdRoles); */
-
-
-            //NCF
-        modelBuilder.Entity<SecuenciaNcf>()
-            .HasIndex(s => s.NumeroComprobante);
-
-        //Paises
+        // ── Paises ────────────────────────────────────────────────────
         modelBuilder.Entity<Pais>()
             .HasKey(p => p.IdPais);
 
-        //Ciudades
+        // ── Ciudades ──────────────────────────────────────────────────
         modelBuilder.Entity<Ciudad>()
             .HasKey(c => c.IdCiudad);
 
@@ -56,7 +40,7 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(p => p.Ciudades)
             .HasForeignKey(c => c.IdPais);
 
-        //clientes
+        // ── Clientes ──────────────────────────────────────────────────
         modelBuilder.Entity<Clientes>()
             .HasKey(c => c.IdCliente);
 
@@ -70,17 +54,25 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(ci => ci.Clientes)
             .HasForeignKey(c => c.IdCiudad);
 
-        //productos
+        // ── Productos ─────────────────────────────────────────────────
         modelBuilder.Entity<Producto>()
             .HasKey(p => p.IdProducto);
+
         modelBuilder.Entity<Producto>()
             .Property(p => p.Stock)
             .HasDefaultValue(0);
 
-        //ventas
+        // ── Secuencias NCF ────────────────────────────────────────────
+        modelBuilder.Entity<SecuenciaNcf>()
+            .HasKey(s => s.IdSecuencia);
+
+        modelBuilder.Entity<SecuenciaNcf>()
+            .HasIndex(s => new { s.TipoComprobante, s.Activa });
+
+        // ── Ventas ────────────────────────────────────────────────────
         modelBuilder.Entity<Venta>()
             .HasKey(v => v.IdVenta);
-            
+
         modelBuilder.Entity<Venta>()
             .HasOne(v => v.Cliente)
             .WithMany(c => c.Ventas)
@@ -91,12 +83,13 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.Ventas)
             .HasForeignKey(v => v.IdUsuario);
 
+        // FK a la PK real de SecuenciaNcf
         modelBuilder.Entity<Venta>()
             .HasOne(v => v.SecuenciaNcf)
             .WithMany(s => s.Ventas)
-            .HasForeignKey(v => v.NumeroComprobante);
+            .HasForeignKey(v => v.IdSecuenciaNcf);
 
-        //Facturas
+        // ── Facturas ──────────────────────────────────────────────────
         modelBuilder.Entity<Factura>()
             .HasKey(f => f.IdFactura);
 
@@ -120,20 +113,10 @@ public class VentasDbContext : IdentityDbContext<ApplicationUser>
             .WithMany(u => u.Facturas)
             .HasForeignKey(f => f.IdUsuario);
 
+        // FK a la PK real de SecuenciaNcf
         modelBuilder.Entity<Factura>()
             .HasOne(f => f.SecuenciaNcf)
             .WithMany(s => s.Facturas)
-            .HasForeignKey(f => f.NumeroComprobante);
-
-
-
-
-        
-
-
-
-        //Roles
-       // modelBuilder.Entity<Roles>()
-            //.HasKey(r => r.IdRoles);
+            .HasForeignKey(f => f.IdSecuenciaNcf);
     }
 }

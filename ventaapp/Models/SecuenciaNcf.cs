@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace ventaapp.Models;
 
@@ -17,6 +16,9 @@ public class SecuenciaNcf
     [Column("tipo_comprobante")]
     public string TipoComprobante { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Columna legacy — no se usa como FK. Se mantiene por compatibilidad.
+    /// </summary>
     [Display(Name = "Comprobante Fiscal")]
     [Column("numero_comprobante")]
     public int NumeroComprobante { get; set; }
@@ -31,12 +33,11 @@ public class SecuenciaNcf
     [Column("numero_final")]
     public int NumeroFinal { get; set; }
 
-    
     [Display(Name = "Número Actual")]
     [Column("numero_actual")]
     public int NumeroActual { get; set; }
 
-    [Display(Name = "Ultimo comprobante")]
+    [Display(Name = "Último comprobante emitido")]
     [Column("numero_ultimo")]
     public int UlitmoNumero { get; set; }
 
@@ -50,34 +51,19 @@ public class SecuenciaNcf
     [Column("activa")]
     public bool Activa { get; set; } = true;
 
+    // ── Navegación ────────────────────────────────────────────────────────
+    public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+    public ICollection<Venta>   Ventas   { get; set; } = new List<Venta>();
 
-      public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
-      public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
-
-    // ─── Propiedades calculadas ───────────────────────────────────────────────
-
-    [NotMapped]
-    public long Disponibles => NumeroFinal - NumeroActual;
-
-    [NotMapped]
-    public long TotalSecuencia => NumeroFinal - NumeroInicial;
-
-    [NotMapped]
-    public long Utilizados => NumeroActual - NumeroInicial;
-
-    [NotMapped]
-    public decimal PorcentajeUsado =>
-        TotalSecuencia == 0 ? 0 :
-        Math.Round((decimal)Utilizados / TotalSecuencia * 100, 1);
-
-    [NotMapped]
-    public bool CercaDeAgotarse => Disponibles > 0 && Disponibles < 100;
-
-    [NotMapped]
-    public bool Agotada => NumeroActual > NumeroFinal;
-
-    [NotMapped]
-    public bool Vencida => DateTime.Today > FechaVencimiento;
+    // ── Propiedades calculadas ────────────────────────────────────────────
+    [NotMapped] public long    Disponibles      => NumeroFinal - NumeroActual;
+    [NotMapped] public long    TotalSecuencia   => NumeroFinal - NumeroInicial;
+    [NotMapped] public long    Utilizados       => NumeroActual - NumeroInicial;
+    [NotMapped] public decimal PorcentajeUsado  =>
+        TotalSecuencia == 0 ? 0 : Math.Round((decimal)Utilizados / TotalSecuencia * 100, 1);
+    [NotMapped] public bool    CercaDeAgotarse  => Disponibles > 0 && Disponibles < 100;
+    [NotMapped] public bool    Agotada          => NumeroActual > NumeroFinal;
+    [NotMapped] public bool    Vencida          => DateTime.Today > FechaVencimiento;
 
     [NotMapped]
     public string Descripcion => TipoComprobante switch
@@ -113,14 +99,16 @@ public class SecuenciaNcf
     };
 
     /// <summary>
-    /// Genera el próximo NCF formateado (ej: "B020000000001") e incrementa
-    /// el contador. Retorna null si la secuencia está agotada, vencida o inactiva.
-    /// Llamar SaveChangesAsync() después para persistir el nuevo NumeroActual.
+    /// Genera el próximo NCF (ej: "B020000000001"), incrementa NumeroActual
+    /// y actualiza UlitmoNumero. Retorna null si no puede generar.
+    /// ¡Llamar SaveChangesAsync() después para persistir!
     /// </summary>
     public string? GenerarProximoNcf()
     {
         if (!Activa || Vencida || Agotada) return null;
+
         string ncf = $"{TipoComprobante}{NumeroActual:D10}";
+        UlitmoNumero = NumeroActual;   // guardar el último emitido
         NumeroActual++;
         return ncf;
     }

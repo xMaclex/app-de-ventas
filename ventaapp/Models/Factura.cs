@@ -10,77 +10,82 @@ public class Factura
         [Column("id_factura")]
         public int IdFactura { get; set; }
 
-        [Required(ErrorMessage = "El ID de venta es obligatorio")]
+        [Required]
         [Display(Name = "Venta")]
         [Column("id_venta")]
         public int IdVenta { get; set; }
 
-        [Required(ErrorMessage = "El ID de cliente es obligatorio")]
+        [Required]
         [Display(Name = "Cliente")]
         [Column("id_cliente")]
         public int IdCliente { get; set; }
 
-        [Required(ErrorMessage = "El ID de producto es obligatorio")]
+        [Required]
         [Display(Name = "Producto")]
         [Column("id_producto")]
         public int IdProducto { get; set; }
 
-        [Required(ErrorMessage = "El número de factura es obligatorio")]
+        [Required]
         [StringLength(30)]
         [Display(Name = "Número de Factura")]
         [Column("numero_factura")]
         public string NumeroFactura { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La fecha de emisión es obligatoria")]
+        [Required]
         [Display(Name = "Fecha de Emisión")]
         [Column("fecha_emision")]
         public DateTime FechaEmision { get; set; } = DateTime.Now;
 
-        [Required(ErrorMessage = "El RNC de la empresa es obligatorio")]
+        [Required]
         [StringLength(30)]
         [Display(Name = "RNC Empresa")]
         [Column("rnc_empresa")]
-        public string RncEmpresa { get; set; } = string.Empty;
+        public string? RncEmpresa { get; set; }
 
-        [Required(ErrorMessage = "El nombre de la empresa es obligatorio")]
+        [Required]
         [StringLength(50)]
         [Display(Name = "Nombre Empresa")]
         [Column("nombre_empresa")]
-        public string NombreEmpresa { get; set; } = string.Empty;
+        public string? NombreEmpresa { get; set; }
 
-        [Required(ErrorMessage = "La dirección de la empresa es obligatoria")]
+        [Required]
         [StringLength(100)]
         [Display(Name = "Dirección Empresa")]
         [Column("direccion_empresa")]
-        public string DireccionEmpresa { get; set; } = string.Empty;
+        public string? DireccionEmpresa { get; set; }
 
-        [Required(ErrorMessage = "El NCF es obligatorio")]
+        /// <summary>
+        /// NCF completo, ej: "B020000000001"
+        /// </summary>
+        [Required]
         [StringLength(20)]
         [Display(Name = "NCF")]
         [Column("ncf")]
-        public string Ncf { get; set; } = string.Empty;
+        public string? Ncf { get; set; }
 
-        [Required(ErrorMessage = "El tipo de comprobante fiscal es obligatorio")]
+        [Required]
         [StringLength(20)]
         [Display(Name = "Tipo de Comprobante Fiscal")]
         [Column("tipo_comprobante_fiscal")]
         public string TipoComprobanteFiscal { get; set; } = string.Empty;
 
-        [Display(Name = "Número Actual")]
-        [Column("numero_comprobante")]
-        public int NumeroComprobante { get; set; }
+        /// <summary>
+        /// FK a secuencias_ncf_tb.id_secuencia
+        /// </summary>
+        [Display(Name = "Secuencia NCF")]
+        [Column("id_secuencia_ncf")]
+        public int? IdSecuenciaNcf { get; set; }
 
-        [Required(ErrorMessage = "El estado es obligatorio")]
+        [Required]
         [StringLength(20)]
         [Display(Name = "Estado")]
         [Column("estado")]
         public string Estado { get; set; } = "Activa";
 
-        // Campos adicionales para gestión avanzada
-        [Display(Name = "Motivo de Anulación")]
         [StringLength(500)]
+        [Display(Name = "Motivo de Anulación")]
         [Column("motivo_anulacion")]
-        public string MotivoAnulacion { get; set; } = string.Empty;
+        public string? MotivoAnulacion { get; set; }
 
         [Display(Name = "Fecha de Anulación")]
         [Column("fecha_anulacion")]
@@ -98,87 +103,33 @@ public class Factura
 
         [Display(Name = "ID del usuario")]
         [Column("id_usuarios")]
-        [ForeignKey(nameof(Usuario))]
         public int IdUsuario { get; set; }
 
-        // Relaciones con las tablas
+        // ── Navegación ──────────────────────────────────────────────────
         public Venta? Venta { get; set; }
         public Clientes? Cliente { get; set; }
         public Producto? Producto { get; set; }
         public Usuarios? Usuario { get; set; }
+
+        [ForeignKey("IdSecuenciaNcf")]
         public SecuenciaNcf? SecuenciaNcf { get; set; }
 
-
-
-        // Propiedades calculadas
+        // ── Propiedades calculadas ───────────────────────────────────────
         [NotMapped]
-        public string EstadoDescripcion
+        public string EstadoDescripcion => Estado switch
         {
-            get
-            {
-                return Estado switch
-                {
-                    "Activa" => "Factura Activa",
-                    "Anulada" => $"Anulada - {MotivoAnulacion}",
-                    _ => "Estado Desconocido"
-                };
-            }
-        }
+            "Activa"  => "Factura Activa",
+            "Anulada" => $"Anulada - {MotivoAnulacion}",
+            _         => "Estado Desconocido"
+        };
 
         [NotMapped]
-        public string TipoNCFDescripcion
+        public string TipoNCFDescripcion => TipoComprobanteFiscal switch
         {
-            get
-            {
-                return TipoComprobanteFiscal switch
-                {
-                    "B01" => "B01 - Crédito Fiscal",
-                    "B02" => "B02 - Consumidor Final",
-                    "B14" => "B14 - Régimen Especial",
-                    "B15" => "B15 - Gubernamental",
-                    _ => TipoComprobanteFiscal
-                };
-            }
-        }
-    }
-
-    /*/ Clase para gestión de secuencias de NCF
-    public class SecuenciaNcf
-    {
-        [Key]
-        public int IdSecuencia { get; set; }
-
-        [Required]
-        [StringLength(3)]
-        public string TipoComprobante { get; set; } = string.Empty;
-
-        [Required]
-        public long NumeroInicial { get; set; }
-
-        [Required]
-        public long NumeroFinal { get; set; }
-
-        [Required]
-        public long NumeroActual { get; set; }
-
-        [Required]
-        public DateTime FechaVencimiento { get; set; }
-
-        public bool Activa { get; set; } = true;
-
-        [NotMapped]
-        public long Disponibles => NumeroFinal - NumeroActual;
-
-        [NotMapped]
-        public decimal PorcentajeUsado => ((decimal)(NumeroActual - NumeroInicial) / (NumeroFinal - NumeroInicial)) * 100;
-
-        [NotMapped]
-        public bool CercaDeAgotarse => Disponibles < 100;
-
-        [NotMapped]
-        public bool Vencida => DateTime.Now > FechaVencimiento;
-
-        
-    }
-
-    */
+            "B01" => "B01 - Crédito Fiscal",
+            "B02" => "B02 - Consumidor Final",
+            "B14" => "B14 - Régimen Especial",
+            "B15" => "B15 - Gubernamental",
+            _     => TipoComprobanteFiscal
+        };
+}

@@ -4,62 +4,128 @@
     ViewData["Title"] = "Editar Secuencia NCF";
 }
 
-<div class="container mt-4" style="max-width: 760px;">
-    <h3 class="mb-3"><i class="bi bi-pencil-square"></i> Editar Secuencia NCF</h3>
+<div class="container mt-4" style="max-width:640px;">
 
-    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-pencil-square me-2" style="color:#4f8ef7;"></i>Editar Secuencia NCF
+            </h3>
+            <small class="text-muted">@Model.Descripcion</small>
+        </div>
+    </div>
 
-    <form asp-action="Editar" asp-route-id="@Model.IdSecuencia" method="post" class="card">
-        <div class="card-body">
-            <input asp-for="IdSecuencia" type="hidden" />
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="TipoComprobante" class="form-label"></label>
-                    <select asp-for="TipoComprobante" class="form-select">
-                        <option value="B01">B01 - Crédito Fiscal</option>
-                        <option value="B02">B02 - Consumidor Final</option>
-                        <option value="B14">B14 - Régimen Especial</option>
-                        <option value="B15">B15 - Gubernamental</option>
-                    </select>
-                    <span asp-validation-for="TipoComprobante" class="text-danger"></span>
-                </div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-                <div class="col-md-6">
-                    <label asp-for="FechaVencimiento" class="form-label"></label>
-                    <input asp-for="FechaVencimiento" type="date" class="form-control" />
-                    <span asp-validation-for="FechaVencimiento" class="text-danger"></span>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="NumeroInicial" class="form-label"></label>
-                    <input asp-for="NumeroInicial" class="form-control" />
-                    <span asp-validation-for="NumeroInicial" class="text-danger"></span>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="NumeroActual" class="form-label"></label>
-                    <input asp-for="NumeroActual" class="form-control" />
-                    <span asp-validation-for="NumeroActual" class="text-danger"></span>
-                </div>
-
-                <div class="col-md-4">
-                    <label asp-for="NumeroFinal" class="form-label"></label>
-                    <input asp-for="NumeroFinal" class="form-control" />
-                    <span asp-validation-for="NumeroFinal" class="text-danger"></span>
-                </div>
-
-                <div class="col-12 form-check mt-2 ms-2">
-                    <input asp-for="Activa" class="form-check-input" />
-                    <label asp-for="Activa" class="form-check-label"></label>
-                </div>
+    <!-- Resumen del estado actual -->
+    <div class="card mb-4 border-0 bg-light">
+        <div class="card-body py-3 d-flex gap-4 flex-wrap">
+            <div class="text-center">
+                <div class="fs-5 fw-bold text-primary">@Model.Utilizados.ToString("N0")</div>
+                <small class="text-muted">Utilizados</small>
+            </div>
+            <div class="text-center">
+                <div class="fs-5 fw-bold text-success">@Model.Disponibles.ToString("N0")</div>
+                <small class="text-muted">Disponibles</small>
+            </div>
+            <div class="text-center">
+                <div class="fs-5 fw-bold">@Model.PorcentajeUsado%</div>
+                <small class="text-muted">Uso</small>
+            </div>
+            <div class="text-center">
+                <span class="badge @Model.BadgeClass fs-6">@Model.EstadoVisual</span>
+                <div><small class="text-muted">Estado</small></div>
             </div>
         </div>
-
-        <div class="card-footer d-flex justify-content-between">
-            <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <div class="px-3 pb-3">
+            <div class="progress" style="height:6px;">
+                <div class="progress-bar @(Model.PorcentajeUsado >= 90 ? "bg-danger" : Model.PorcentajeUsado >= 75 ? "bg-warning" : "bg-success")"
+                     style="width:@Model.PorcentajeUsado%"></div>
+            </div>
         </div>
-    </form>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form asp-action="Editar" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="IdSecuencia" />
+
+                <!-- Tipo (solo lectura una vez creado) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Tipo de Comprobante</label>
+                    <input type="text" class="form-control bg-light" value="@Model.Descripcion" readonly />
+                    <input type="hidden" asp-for="TipoComprobante" />
+                    <div class="form-text">El tipo no puede modificarse. Cree una nueva secuencia si necesita otro tipo.</div>
+                </div>
+
+                <!-- Rango -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label asp-for="NumeroInicial" class="form-label fw-semibold">Número Inicial</label>
+                        <input asp-for="NumeroInicial" type="number" class="form-control bg-light" readonly />
+                        <span asp-validation-for="NumeroInicial" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="NumeroFinal" class="form-label fw-semibold">
+                            Número Final <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="NumeroFinal" type="number" class="form-control" min="@(Model.NumeroActual + 1)" />
+                        <span asp-validation-for="NumeroFinal" class="text-danger small"></span>
+                        <div class="form-text">Puede ampliar el rango si la DGII lo autorizó.</div>
+                    </div>
+                </div>
+
+                <!-- Número actual (ajuste manual si fuera necesario) -->
+                <div class="mb-4">
+                    <label asp-for="NumeroActual" class="form-label fw-semibold">
+                        Número Actual <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="NumeroActual" type="number" class="form-control"
+                           min="@Model.NumeroInicial" max="@Model.NumeroFinal" />
+                    <span asp-validation-for="NumeroActual" class="text-danger small"></span>
+                    <div class="form-text text-warning">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        Modifique este valor solo si necesita corregir un desfase. El siguiente NCF emitido usará este número.
+                    </div>
+                </div>
+
+                <!-- Fecha de vencimiento -->
+                <div class="mb-4">
+                    <label asp-for="FechaVencimiento" class="form-label fw-semibold">
+                        Fecha de Vencimiento <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="FechaVencimiento" type="date" class="form-control" />
+                    <span asp-validation-for="FechaVencimiento" class="text-danger small"></span>
+                </div>
+
+                <!-- Activa -->
+                <div class="mb-4 form-check form-switch">
+                    <input asp-for="Activa" class="form-check-input" role="switch" id="activaSwitch" />
+                    <label class="form-check-label fw-semibold" for="activaSwitch">Secuencia activa</label>
+                </div>
+
+                <hr />
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-save me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

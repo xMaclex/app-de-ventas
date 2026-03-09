@@ -106,7 +106,6 @@ app.MapStaticAssets(); */
 // CONEXION PHP MYADMIN
 //=======================
 
-
 // Agregar DbContext
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

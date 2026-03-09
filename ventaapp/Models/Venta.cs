@@ -51,12 +51,22 @@ public class Venta
         [StringLength(30)]
         [Display(Name = "Tipo de Comprobante")]
         [Column("tipo_comprobante")]
-        public string TipoComprobante { get; set; } = string.Empty;
+        public string? TipoComprobante { get; set; }
 
+        /// <summary>
+        /// NCF generado completo, ej: "B020000000001"
+        /// </summary>
         [StringLength(20)]
-        [Display(Name = "Número de Comprobante")]
-        [Column("numero_comprobante")]
-        public int NumeroComprobante { get; set; }
+        [Display(Name = "NCF Generado")]
+        [Column("ncf_generado")]
+        public string? NcfGenerado { get; set; }
+
+        /// <summary>
+        /// FK a secuencias_ncf_tb.id_secuencia
+        /// </summary>
+        [Display(Name = "Secuencia NCF")]
+        [Column("id_secuencia_ncf")]
+        public int? IdSecuenciaNcf { get; set; }
 
         [Required(ErrorMessage = "El estado es obligatorio")]
         [StringLength(20)]
@@ -64,7 +74,6 @@ public class Venta
         [Column("estado")]
         public string Estado { get; set; } = "Completada";
 
-        // Campos adicionales para funcionalidades avanzadas
         [Display(Name = "Descuento")]
         [Column("descuento")]
         [DataType(DataType.Currency)]
@@ -73,67 +82,64 @@ public class Venta
         [Display(Name = "Tipo de Descuento")]
         [StringLength(20)]
         [Column("tipo_descuento")]
-        public string TipoDescuento { get; set; } = "Monto"; // "Monto" o "Porcentaje"
+        public string TipoDescuento { get; set; } = "Monto";
 
         [Display(Name = "Tipo de Venta")]
         [StringLength(20)]
         [Column("tipo_venta")]
-        public string TipoVenta { get; set; } = "Contado"; // "Contado" o "Crédito"
+        public string TipoVenta { get; set; } = "Contado";
 
         [Display(Name = "Notas")]
         [StringLength(500)]
         [Column("notas")]
-        public string Notas { get; set; } = string.Empty;
+        public string? Notas { get; set; }
 
-        [Display(Name = "Usuario: ")]
+        [Display(Name = "Usuario")]
         [Column("id_usuarios")]
         public int IdUsuario { get; set; }
 
-        // Relaciones con las tablas
+        // ── Navegación ──────────────────────────────────────────────────
         public Clientes? Cliente { get; set; }
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+        public Usuarios? Usuario { get; set; }
 
-        public Usuarios? Usuario { get; set; } 
+        [ForeignKey("IdSecuenciaNcf")]
         public SecuenciaNcf? SecuenciaNcf { get; set; }
+}
 
-        
-    }
+// ── Clase auxiliar para el carrito ──────────────────────────────────────────
+public class VentaDetalle
+{
+    public int IdProducto { get; set; }
+    public string CodigoProducto { get; set; } = string.Empty;
+    public string NombreProducto { get; set; } = string.Empty;
+    public decimal PrecioUnitario { get; set; }
+    public int Cantidad { get; set; }
+    public decimal Impuesto { get; set; }
+    public decimal Subtotal => PrecioUnitario * Cantidad;
+    public decimal MontoImpuesto => Subtotal * (Impuesto / 100);
+    public decimal Total => Subtotal + MontoImpuesto;
+}
 
-    // Clase auxiliar para manejar el detalle de la venta (carrito)
-    public class VentaDetalle
+// ── ViewModel para el punto de venta ────────────────────────────────────────
+public class PuntoVentaViewModel
+{
+    public Venta Venta { get; set; } = new Venta();
+    public List<VentaDetalle> Carrito { get; set; } = new List<VentaDetalle>();
+    public List<Clientes> Clientes { get; set; } = new List<Clientes>();
+    public List<Producto> Productos { get; set; } = new List<Producto>();
+
+    public decimal SubtotalCarrito => Carrito.Sum(d => d.Subtotal);
+    public decimal ItbisCarrito => Carrito.Sum(d => d.MontoImpuesto);
+    public decimal TotalCarrito => Carrito.Sum(d => d.Total);
+    public decimal DescuentoCalculado
     {
-        public int IdProducto { get; set; }
-        public string CodigoProducto { get; set; } = string.Empty;
-        public string NombreProducto { get; set; } = string.Empty;
-        public decimal PrecioUnitario { get; set; }
-        public int Cantidad { get; set; }
-        public decimal Impuesto { get; set; }
-        public decimal Subtotal => PrecioUnitario * Cantidad;
-        public decimal MontoImpuesto => Subtotal * (Impuesto / 100);
-        public decimal Total => Subtotal + MontoImpuesto;
-    }
-
-    // ViewModel para el punto de venta
-    public class PuntoVentaViewModel
-    {
-        public Venta Venta { get; set; } = new Venta();
-        public List<VentaDetalle> Carrito { get; set; } = new List<VentaDetalle>();
-        public List<Clientes> Clientes { get; set; } = new List<Clientes>();
-        public List<Producto> Productos { get; set; } = new List<Producto>();
-        
-        // Propiedades calculadas
-        public decimal SubtotalCarrito => Carrito.Sum(d => d.Subtotal);
-        public decimal ItbisCarrito => Carrito.Sum(d => d.MontoImpuesto);
-        public decimal TotalCarrito => Carrito.Sum(d => d.Total);
-        public decimal DescuentoCalculado
+        get
         {
-            get
-            {
-                if (Venta.TipoDescuento == "Porcentaje")
-                    return SubtotalCarrito * (Venta.Descuento / 100);
-                else
-                    return Venta.Descuento;
-            }
+            if (Venta.TipoDescuento == "Porcentaje")
+                return SubtotalCarrito * (Venta.Descuento / 100);
+            return Venta.Descuento;
         }
-        public decimal TotalFinal => TotalCarrito - DescuentoCalculado;
     }
+    public decimal TotalFinal => TotalCarrito - DescuentoCalculado;
+}

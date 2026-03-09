@@ -167,9 +167,6 @@
                         </tr>
                     </thead>
                     <tbody>
-
-
-
                         @if (Model != null && Model.Any())
                         {
                             @foreach (var venta in Model)
@@ -178,7 +175,7 @@
                                     <td><strong>#@venta.IdVenta</strong></td>
                                     <td>@venta.FechaVenta.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>@venta?.Cliente?.NombreCompleto</td>
-                                    
+                                    <td><code>@venta?.IdSecuenciaNcf</code></td> 
                                     <td class="text-end"><strong>$@venta?.Total.ToString("N2")</strong></td>
                                     <td>
                                         <span class="badge bg-info">@venta?.MetodoPago</span>

@@ -67,6 +67,7 @@ namespace ventaapp.Controllers
                 }
 
                 model.NumeroActual = model.NumeroInicial;
+                model.UlitmoNumero  = model.NumeroInicial;
 
                 _context.SecuenciaNcf.Add(model);
                 await _context.SaveChangesAsync();
@@ -223,13 +224,23 @@ namespace ventaapp.Controllers
             try
             {
                 var secuencia = await _context.SecuenciaNcf
-                    .Where(s => s.TipoComprobante == req.Tipo && s.Activa)
+                    .Where(s => s.TipoComprobante == req.Tipo 
+                            && s.Activa
+                            && s.FechaVencimiento >= DateTime.Today
+                            && s.NumeroActual <= s.NumeroFinal)
                     .FirstOrDefaultAsync();
 
-                if (secuencia == null || secuencia.Vencida || secuencia.Agotada)
+                if (secuencia == null)
                     return Json(new { ok = false, mensaje = "No hay secuencia NCF disponible." });
 
                 var ncf = secuencia.GenerarProximoNcf();
+
+                if (ncf == null)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new { ok = false, mensaje = "La secuencia está agotada o vencida." });
+                }
+
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 

@@ -132,13 +132,13 @@
                     </div>
                 </div>
 
-                <!-- Método de Pago -->
+                <!-- Método de Pago y Comprobante Fiscal -->
                 <div class="card mb-3">
                     <div class="card-header bg-warning">
                         <h6 class="mb-0"><i class="bi bi-credit-card"></i> Método de Pago</h6>
                     </div>
                     <div class="card-body">
-                        <select asp-for="Venta.MetodoPago" class="form-select mb-2" required>
+                        <select asp-for="Venta.MetodoPago" class="form-select mb-3" required>
                             <option value="">-- Seleccione --</option>
                             <option value="Efectivo">Efectivo</option>
                             <option value="Tarjeta">Tarjeta de Crédito/Débito</option>
@@ -146,21 +146,66 @@
                             <option value="Cheque">Cheque</option>
                         </select>
 
-                      <!--  <label class="form-label">Tipo de Comprobante:</label>
-                        <select asp-for="Venta.TipoComprobante" class="form-select mb-2" >
-                            <option value="">-- Seleccione --</option>
-                            <option value="B01">B01 - Crédito Fiscal</option>
-                            <option value="B02">B02 - Consumidor Final</option>
-                            <option value="B14">B14 - Régimen Especial</option>
-                            <option value="B15">B15 - Gubernamental</option>
-                            <option value=" ">Preforma</option>
-                        </select> -->
+                        <!-- ===== COMPROBANTE FISCAL ===== -->
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-file-earmark-ruled me-1"></i>Tipo de Comprobante Fiscal:
+                        </label>
 
-                        <label class="form-label">Tipo de Venta:</label>
-                        <select asp-for="Venta.TipoVenta" class="form-select" required>
-                            <option value="Contado">Contado</option>
-                            <option value="Crédito">Crédito</option>
-                        </select>
+                        <!-- Botones de selección rápida tipo "chip" -->
+                        <div class="d-flex flex-wrap gap-2 mb-2" id="botonesComprobante">
+                            <button type="button"
+                                    class="btn btn-sm btn-ncf btn-primary active"
+                                    data-valor="Preforma"
+                                    onclick="seleccionarComprobante(this)">
+                                <i class="bi bi-file-earmark-minus me-1"></i>Preforma
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-ncf btn-outline-secondary"
+                                    data-valor="B01"
+                                    onclick="seleccionarComprobante(this)">
+                                B01 – Crédito Fiscal
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-ncf btn-outline-secondary"
+                                    data-valor="B02"
+                                    onclick="seleccionarComprobante(this)">
+                                B02 – Consumidor Final
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-ncf btn-outline-secondary"
+                                    data-valor="B14"
+                                    onclick="seleccionarComprobante(this)">
+                                B14 – Régimen Especial
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm btn-ncf btn-outline-secondary"
+                                    data-valor="B15"
+                                    onclick="seleccionarComprobante(this)">
+                                B15 – Gubernamental
+                            </button>
+                        </div>
+
+                        <!-- Campo hidden que envía el valor seleccionado al controller -->
+                        <input type="hidden" asp-for="Venta.TipoComprobante"
+                               id="tipoComprobanteHidden" value="Preforma" />
+
+                        <!-- Alerta informativa dinámica según la selección -->
+                        <div id="alertaComprobante"
+                             class="alert alert-light border py-2 px-3 mb-0 small mt-1">
+                            <i class="bi bi-info-circle text-secondary me-1"></i>
+                            <span id="textoAlertaComprobante">
+                                Sin comprobante fiscal. Se emitirá solo como documento interno.
+                            </span>
+                        </div>
+                        <!-- ===== FIN COMPROBANTE FISCAL ===== -->
+
+                        <div class="mt-3">
+                            <label class="form-label fw-semibold">Tipo de Venta:</label>
+                            <select asp-for="Venta.TipoVenta" class="form-select" required>
+                                <option value="Contado">Contado</option>
+                                <option value="Crédito">Crédito</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -197,7 +242,61 @@
     <script>
         // Variables globales
         let carrito = [];
-        
+
+        // ===== LÓGICA DE COMPROBANTE FISCAL =====
+        const infoComprobante = {
+            'Preforma': {
+                alerta: 'alert-light border',
+                icono:  'bi-info-circle text-secondary',
+                texto:  'Sin comprobante fiscal. Se emitirá solo como documento interno (preforma).'
+            },
+            'B01': {
+                alerta: 'alert-primary',
+                icono:  'bi-building text-primary',
+                texto:  'Crédito Fiscal: para empresas o personas jurídicas con RNC. Requiere secuencia B01 activa.'
+            },
+            'B02': {
+                alerta: 'alert-success',
+                icono:  'bi-person-check text-success',
+                texto:  'Consumidor Final: para personas físicas o clientes sin RNC.'
+            },
+            'B14': {
+                alerta: 'alert-warning',
+                icono:  'bi-star text-warning',
+                texto:  'Régimen Especial de Tributación: requiere autorización previa de la DGII.'
+            },
+            'B15': {
+                alerta: 'alert-info',
+                icono:  'bi-bank text-info',
+                texto:  'Gubernamental: exclusivo para instituciones y dependencias del Estado Dominicano.'
+            }
+        };
+
+        function seleccionarComprobante(btn) {
+            // Desactivar todos los botones
+            document.querySelectorAll('.btn-ncf').forEach(b => {
+                b.classList.remove('active', 'btn-primary', 'btn-success', 'btn-warning',
+                                   'btn-info', 'btn-secondary');
+                b.classList.add('btn-outline-secondary');
+            });
+
+            // Activar el botón clickeado
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-primary', 'active');
+
+            const valor = btn.dataset.valor;
+
+            // Actualizar campo hidden que se enviará al controller
+            document.getElementById('tipoComprobanteHidden').value = valor;
+
+            // Actualizar alerta informativa
+            const info = infoComprobante[valor] ?? infoComprobante['Preforma'];
+            const alerta = document.getElementById('alertaComprobante');
+            alerta.className = `alert ${info.alerta} py-2 px-3 mb-0 small mt-1`;
+            alerta.innerHTML = `<i class="bi ${info.icono} me-1"></i><span>${info.texto}</span>`;
+        }
+        // ===== FIN LÓGICA COMPROBANTE =====
+
         // Función para buscar productos
         async function buscarProductos(termino) {
             if (termino.length < 2) return;
@@ -205,7 +304,6 @@
             try {
                 const response = await fetch(`/Ventas/BuscarProducto?termino=${encodeURIComponent(termino)}`);
                 const productos = await response.json();
-                
                 mostrarResultados(productos);
             } catch (error) {
                 console.error('Error al buscar productos:', error);
@@ -243,13 +341,11 @@
                 `;
             });
             html += '</div>';
-            
             resultadosDiv.innerHTML = html;
         }
         
         // Agregar producto al carrito
         function agregarAlCarrito(idProducto, codigo, nombre, precio, impuesto, stock) {
-            // Verificar si el producto ya está en el carrito
             const itemExistente = carrito.find(item => item.IdProducto === idProducto);
             
             if (itemExistente) {
@@ -285,11 +381,8 @@
                 tbody.querySelectorAll('tr:not(#carritoVacio)').forEach(tr => tr.remove());
             } else {
                 carritoVacio.style.display = 'none';
-                
-                // Limpiar tbody excepto carritoVacio
                 tbody.querySelectorAll('tr:not(#carritoVacio)').forEach(tr => tr.remove());
                 
-                // Agregar items del carrito
                 carrito.forEach((item, index) => {
                     const subtotal = item.PrecioUnitario * item.Cantidad;
                     const tr = document.createElement('tr');
@@ -325,16 +418,12 @@
             calcularTotales();
         }
         
-        // Cambiar cantidad
         function cambiarCantidad(index, delta) {
             carrito[index].Cantidad += delta;
-            if (carrito[index].Cantidad < 1) {
-                carrito[index].Cantidad = 1;
-            }
+            if (carrito[index].Cantidad < 1) carrito[index].Cantidad = 1;
             actualizarCarrito();
         }
         
-        // Actualizar cantidad
         function actualizarCantidad(index, nuevaCantidad) {
             let cantidad = parseInt(nuevaCantidad);
             if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
@@ -347,13 +436,11 @@
             actualizarCarrito();
         }
         
-        // Eliminar del carrito
         function eliminarDelCarrito(index) {
             carrito.splice(index, 1);
             actualizarCarrito();
         }
         
-        // Calcular totales
         function calcularTotales() {
             let subtotal = 0;
             let itbis = 0;
@@ -364,7 +451,6 @@
                 itbis += itemSubtotal * (item.Impuesto / 100);
             });
             
-            // Calcular descuento
             const descuentoInput = parseFloat(document.getElementById('inputDescuento').value) || 0;
             const tipoDescuento = document.getElementById('tipoDescuento').value;
             let descuento = 0;
@@ -377,7 +463,6 @@
             
             const total = subtotal + itbis - descuento;
             
-            // Actualizar display
             document.getElementById('displaySubtotal').textContent = '$' + subtotal.toFixed(2);
             document.getElementById('displayItbis').textContent = '$' + itbis.toFixed(2);
             document.getElementById('displayDescuento').textContent = '-$' + descuento.toFixed(2);
@@ -408,18 +493,17 @@
                 carrito = [];
                 actualizarCarrito();
                 document.getElementById('formVenta').reset();
+                // Resetear selector de comprobante a Preforma
+                seleccionarComprobante(document.querySelector('.btn-ncf[data-valor="Preforma"]'));
             }
         });
         
-        // Al enviar el formulario
         document.getElementById('formVenta').addEventListener('submit', function(e) {
             if (carrito.length === 0) {
                 e.preventDefault();
                 alert('El carrito está vacío. Agregue productos antes de procesar la venta.');
                 return false;
             }
-            
-            // Serializar el carrito a JSON
             document.getElementById('carritoJson').value = JSON.stringify(carrito);
         });
     </script>

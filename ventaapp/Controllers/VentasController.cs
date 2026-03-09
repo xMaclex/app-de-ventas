@@ -11,7 +11,6 @@ namespace ventaapp.Controllers
     public class VentasController : Controller
     {
         private readonly VentasDbContext _context;
-        private static readonly Random _random = new Random();
 
         public VentasController(VentasDbContext context)
         {
@@ -19,61 +18,38 @@ namespace ventaapp.Controllers
         }
 
         // GET: Ventas (Historial)
-        public async Task<IActionResult> Index(DateTime? fechaDesde, DateTime? fechaHasta, 
+        public async Task<IActionResult> Index(DateTime? fechaDesde, DateTime? fechaHasta,
             int? idCliente, string metodoPago, string estado)
         {
             ViewData["FechaDesde"] = fechaDesde?.ToString("yyyy-MM-dd");
             ViewData["FechaHasta"] = fechaHasta?.ToString("yyyy-MM-dd");
-            ViewData["IdCliente"] = idCliente;
+            ViewData["IdCliente"]  = idCliente;
             ViewData["MetodoPago"] = metodoPago;
-            ViewData["Estado"] = estado;
+            ViewData["Estado"]     = estado;
 
             var ventas = _context.Ventas
                 .Include(v => v.Cliente)
                 .AsQueryable();
 
-            // Filtros
             if (fechaDesde.HasValue)
                 ventas = ventas.Where(v => v.FechaVenta.Date >= fechaDesde.Value.Date);
-
             if (fechaHasta.HasValue)
                 ventas = ventas.Where(v => v.FechaVenta.Date <= fechaHasta.Value.Date);
-
             if (idCliente.HasValue)
                 ventas = ventas.Where(v => v.IdCliente == idCliente.Value);
-
             if (!string.IsNullOrEmpty(metodoPago))
                 ventas = ventas.Where(v => v.MetodoPago == metodoPago);
-
             if (!string.IsNullOrEmpty(estado))
                 ventas = ventas.Where(v => v.Estado == estado);
 
             var ventasList = await ventas.OrderByDescending(v => v.FechaVenta).ToListAsync();
 
-            // Estadísticas
             var hoy = DateTime.Today;
-            ViewBag.VentasHoy = await _context.Ventas
-                .Where(v => v.FechaVenta.Date == hoy && v.Estado == "Completada")
-                .CountAsync();
-            
-            ViewBag.TotalHoy = await _context.Ventas
-                .Where(v => v.FechaVenta.Date == hoy && v.Estado == "Completada")
-                .SumAsync(v => (decimal?)v.Total) ?? 0;
-
-            ViewBag.VentasMes = await _context.Ventas
-                .Where(v => v.FechaVenta.Month == hoy.Month && 
-                           v.FechaVenta.Year == hoy.Year && 
-                           v.Estado == "Completada")
-                .CountAsync();
-
-            ViewBag.TotalMes = await _context.Ventas
-                .Where(v => v.FechaVenta.Month == hoy.Month && 
-                           v.FechaVenta.Year == hoy.Year && 
-                           v.Estado == "Completada")
-                .SumAsync(v => (decimal?)v.Total) ?? 0;
-
-            // Lista de clientes para filtro
-            ViewBag.Clientes = await _context.Clientes.OrderBy(c => c.Nombres).ToListAsync();
+            ViewBag.VentasHoy  = await _context.Ventas.Where(v => v.FechaVenta.Date == hoy && v.Estado == "Completada").CountAsync();
+            ViewBag.TotalHoy   = await _context.Ventas.Where(v => v.FechaVenta.Date == hoy && v.Estado == "Completada").SumAsync(v => (decimal?)v.Total) ?? 0;
+            ViewBag.VentasMes  = await _context.Ventas.Where(v => v.FechaVenta.Month == hoy.Month && v.FechaVenta.Year == hoy.Year && v.Estado == "Completada").CountAsync();
+            ViewBag.TotalMes   = await _context.Ventas.Where(v => v.FechaVenta.Month == hoy.Month && v.FechaVenta.Year == hoy.Year && v.Estado == "Completada").SumAsync(v => (decimal?)v.Total) ?? 0;
+            ViewBag.Clientes   = await _context.Clientes.OrderBy(c => c.Nombres).ToListAsync();
 
             return View(ventasList);
         }
@@ -89,7 +65,6 @@ namespace ventaapp.Controllers
                     .OrderBy(p => p.NombreProducto)
                     .ToListAsync()
             };
-
             return View(viewModel);
         }
 
@@ -101,9 +76,7 @@ namespace ventaapp.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // ============================================
-                // 1. VALIDACIONES INICIALES
-                // ============================================
+                // ── 1. Validaciones básicas ────────────────────────────────────
                 if (string.IsNullOrEmpty(carritoJson))
                 {
                     TempData["Error"] = "El carrito está vacío.";
@@ -111,7 +84,6 @@ namespace ventaapp.Controllers
                 }
 
                 var carrito = JsonSerializer.Deserialize<List<VentaDetalle>>(carritoJson);
-
                 if (carrito == null || !carrito.Any())
                 {
                     TempData["Error"] = "El carrito está vacío.";
@@ -124,8 +96,6 @@ namespace ventaapp.Controllers
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // ← CLAVE: AsNoTracking() evita que EF rastree el cliente
-                // y no intente actualizar sus campos relacionados (IdPais, IdCiudad)
                 var cliente = await _context.Clientes
                     .AsNoTracking()
                     .FirstOrDefaultAsync(c => c.IdCliente == venta.IdCliente);
@@ -142,50 +112,38 @@ namespace ventaapp.Controllers
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // ============================================
-                // 2. VALIDAR STOCK DE TODOS LOS PRODUCTOS
-                // ============================================
-                var productosInsuficientes = new List<string>();
-                // Cargar todos los productos del carrito de una sola vez
+                // ── 2. Validar stock ───────────────────────────────────────────
                 var idsProductos = carrito.Select(i => i.IdProducto).ToList();
-                
-                // ← CLAVE: NO usar AsNoTracking aquí porque necesitamos modificar el stock
-                var productosDb = await _context.Productos
+                var productosDb  = await _context.Productos
                     .Where(p => idsProductos.Contains(p.IdProducto))
                     .ToDictionaryAsync(p => p.IdProducto);
 
+                var productosInsuficientes = new List<string>();
                 foreach (var item in carrito)
                 {
-                    if (!productosDb.TryGetValue(item.IdProducto, out var productoDb))
+                    if (!productosDb.TryGetValue(item.IdProducto, out var prod))
                     {
-                        TempData["Error"] = $"El producto '{item.NombreProducto}' no existe en el sistema.";
+                        TempData["Error"] = $"El producto '{item.NombreProducto}' no existe.";
                         await transaction.RollbackAsync();
                         return RedirectToAction(nameof(PuntoVenta));
                     }
-
-                    if (productoDb.Stock < item.Cantidad)
-                    {
-                        productosInsuficientes.Add(
-                            $"{productoDb.NombreProducto} - Disponible: {productoDb.Stock}, Solicitado: {item.Cantidad}"
-                        );
-                    }
+                    if (prod.Stock < item.Cantidad)
+                        productosInsuficientes.Add($"{prod.NombreProducto} — disponible: {prod.Stock}, solicitado: {item.Cantidad}");
                 }
 
                 if (productosInsuficientes.Any())
                 {
-                    TempData["Error"] = $"Stock insuficiente:\n{string.Join("\n", productosInsuficientes)}";
+                    TempData["Error"] = "Stock insuficiente:\n" + string.Join("\n", productosInsuficientes);
                     await transaction.RollbackAsync();
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // ============================================
-                // 3. CALCULAR TOTALES
-                // ============================================
+                // ── 3. Calcular totales ────────────────────────────────────────
                 decimal subtotal = carrito.Sum(d => d.Subtotal);
-                decimal itbis = carrito.Sum(d => d.MontoImpuesto);
+                decimal itbis    = carrito.Sum(d => d.MontoImpuesto);
                 decimal descuento = 0;
 
-                if (!string.IsNullOrEmpty(venta.TipoDescuento) && venta.TipoDescuento == "Porcentaje")
+                if (venta.TipoDescuento == "Porcentaje" && venta.Descuento > 0)
                     descuento = subtotal * (venta.Descuento / 100);
                 else if (venta.Descuento > 0)
                     descuento = venta.Descuento;
@@ -199,48 +157,38 @@ namespace ventaapp.Controllers
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // ============================================
-                // 4. OBTENER USUARIO AUTENTICADO
-                // ============================================
+                // ── 4. Usuario autenticado ─────────────────────────────────────
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
                 {
-                    TempData["Error"] = "No se pudo identificar el usuario autenticado.";
+                    TempData["Error"] = "No se pudo identificar al usuario autenticado.";
                     await transaction.RollbackAsync();
                     return RedirectToAction(nameof(PuntoVenta));
                 }
 
-                // ============================================
-                // 5. CREAR Y GUARDAR LA VENTA PRIMERO
-                // ← CLAVE: Guardar antes de crear facturas para obtener el IdVenta real
-                // ============================================
-                var nuevaVenta = new Venta
+                // ── 5. Obtener y validar la secuencia NCF ─────────────────────
+// ── 5. Obtener y validar la secuencia NCF ─────────────────────
+
+                string tipoNcf      = venta.TipoComprobante ?? "Preforma";
+                string? ncfGenerado = null;
+                SecuenciaNcf? secuenciaNcf = null;
+
+                if (venta.TipoComprobante != "Preforma")
                 {
-                    FechaVenta = DateTime.Now,
-                    IdCliente = venta.IdCliente,
-                    Subtotal = subtotal,
-                    Itbis = itbis,
-                    Descuento = descuento,
-                    TipoDescuento = venta.TipoDescuento ?? "Monto",
-                    Total = total,
-                    MetodoPago = venta.MetodoPago,
-                    TipoComprobante = venta.TipoComprobante ?? "Factura",
-                    NumeroComprobante = venta.NumeroComprobante,
-                    TipoVenta = venta.TipoVenta ?? "Normal",
-                    Notas = venta.Notas ?? string.Empty,
-                    Estado = "Completada",
-                    IdUsuario = userId
-                };
+                    // Determinar tipo según TipoDocumento del cliente
+                    tipoNcf = (cliente.TipoDocumento == "RNC") ? "B01" : venta.TipoComprobante!;
 
-                _context.Ventas.Add(nuevaVenta);
+                    // Bloquear la fila para evitar concurrencia (PESSIMISTIC LOCK)
+                    var ahora = DateTime.Today;
 
-                string tipoNcf = (cliente.TipoDocumento == "RNC") ? "B01" : "B02";
+                    secuenciaNcf = await _context.SecuenciaNcf
+                        .Where(s => s.TipoComprobante == tipoNcf
+                                && s.Activa
+                                && s.FechaVencimiento >= ahora       // reemplaza !s.Vencida
+                                && s.NumeroActual <= s.NumeroFinal)
+                        .FirstOrDefaultAsync();
 
-                var secuenciaNcf = await _context.SecuenciaNcf
-                    .Where(s => s.TipoComprobante == tipoNcf && s.Activa && !s.Vencida && !s.Agotada)
-                    .FirstOrDefaultAsync();
-
-                if (secuenciaNcf == null)
+                    if (secuenciaNcf == null)
                     {
                         TempData["Error"] = $"No hay secuencia NCF activa para el tipo {tipoNcf}. " +
                                             "Configure una en Configuración → Comprobantes Fiscales (NCF).";
@@ -248,71 +196,81 @@ namespace ventaapp.Controllers
                         return RedirectToAction(nameof(PuntoVenta));
                     }
 
-                // Un solo NCF por venta (aunque tenga varios productos/facturas)
-                string? ncfGenerado = secuenciaNcf.GenerarProximoNcf();
-                if (ncfGenerado == null)
-                {
-                    TempData["Error"] = "La secuencia NCF está agotada o vencida. Configure una nueva secuencia.";
-                    await transaction.RollbackAsync();
-                    return RedirectToAction(nameof(PuntoVenta));
+                    // Generar el NCF e incrementar el contador
+                    ncfGenerado = secuenciaNcf.GenerarProximoNcf();
+                    if (ncfGenerado == null)
+                    {
+                        TempData["Error"] = "La secuencia NCF está agotada o vencida. Configure una nueva.";
+                        await transaction.RollbackAsync();
+                        return RedirectToAction(nameof(PuntoVenta));
+                    }
                 }
 
-                    
+                // ── 6. Crear y guardar la venta ───────────────────────────────
+                var nuevaVenta = new Venta
+                {
+                    FechaVenta      = DateTime.Now,
+                    IdCliente       = venta.IdCliente,
+                    Subtotal        = subtotal,
+                    Itbis           = itbis,
+                    Descuento       = descuento,
+                    TipoDescuento   = venta.TipoDescuento ?? "Monto",
+                    Total           = total,
+                    MetodoPago      = venta.MetodoPago,
+                    TipoComprobante = tipoNcf,
+                    NcfGenerado     = ncfGenerado,                        // null si Preforma
+                    IdSecuenciaNcf  = secuenciaNcf?.IdSecuencia ?? null,     // 0 si Preforma
+                    TipoVenta       = venta.TipoVenta ?? "Contado",
+                    Notas           = venta.Notas ?? string.Empty,
+                    Estado          = "Completada",
+                    IdUsuario       = userId
+                };
 
-
-                
-                // ← GUARDAR LA VENTA PRIMERO para que EF genere el IdVenta
+                _context.Ventas.Add(nuevaVenta);
+                // Guardar venta y actualizar NumeroActual de la secuencia en un solo hit
                 await _context.SaveChangesAsync();
 
-                // ============================================
-                // 6. DESCONTAR STOCK Y CREAR FACTURAS
-                // Ahora nuevaVenta.IdVenta tiene el valor real de la BD
-                // ============================================
+                // ── 7. Descontar stock y crear facturas ───────────────────────
                 foreach (var item in carrito)
                 {
-                    var productoDb = productosDb[item.IdProducto];
+                    var prod = productosDb[item.IdProducto];
+                    prod.Stock -= item.Cantidad;
+                    _context.Entry(prod).Property(p => p.Stock).IsModified = true;
 
-                    // Descontar stock
-                    productoDb.Stock -= item.Cantidad;
-                    _context.Entry(productoDb).Property(p => p.Stock).IsModified = true;
+                    decimal precioUnit = item.PrecioUnitario;
+                    decimal itbisUnit  = precioUnit * (item.Impuesto / 100);
 
-                    decimal precioUnitario = item.PrecioUnitario;
-                    decimal montoItbisUnitario = precioUnitario * (item.Impuesto / 100);
-
-                    // Crear una factura por cada unidad vendida
                     for (int i = 0; i < item.Cantidad; i++)
                     {
                         var factura = new Factura
                         {
-                            // ← Ahora sí tiene el ID real
-                            IdVenta = nuevaVenta.IdVenta,
-                            IdCliente = venta.IdCliente,
-                            IdProducto = item.IdProducto,
-                            NumeroFactura = $"F-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..8].ToUpper()}",
-                            FechaEmision = DateTime.Now,
-                            RncEmpresa = "000-00000-0",
-                            NombreEmpresa = "VentaApp",
-                            DireccionEmpresa = "Santo Domingo, RD",
-                            //Ncf = GenerarNCF(),
-                            TipoComprobanteFiscal = venta.TipoComprobante ?? "Factura",
-                            Estado = "Activa",
-                            IdUsuario = userId,
-                            MontoTotal = precioUnitario + montoItbisUnitario,
-                            MontoItbis = montoItbisUnitario,
-                            MotivoAnulacion = string.Empty
+                            IdVenta               = nuevaVenta.IdVenta,
+                            IdCliente             = venta.IdCliente,
+                            IdProducto            = item.IdProducto,
+                            NumeroFactura         = $"F-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..8].ToUpper()}",
+                            FechaEmision          = DateTime.Now,
+                            RncEmpresa            = "000-00000-0",
+                            NombreEmpresa         = "VentaApp",
+                            DireccionEmpresa      = "Santo Domingo, RD",
+                            Ncf                   = ncfGenerado ?? string.Empty,       // ← null-safe
+                            TipoComprobanteFiscal = tipoNcf,
+                            IdSecuenciaNcf        = secuenciaNcf?.IdSecuencia ?? null, // ← null-safe
+                            Estado                = "Activa",
+                            IdUsuario             = userId,
+                            MontoTotal            = precioUnit + itbisUnit,
+                            MontoItbis            = itbisUnit,
+                            MotivoAnulacion       = string.Empty
                         };
 
                         _context.Facturas.Add(factura);
                     }
                 }
 
-                // ============================================
-                // 7. GUARDAR FACTURAS Y STOCK, CONFIRMAR TRANSACCIÓN
-                // ============================================
+                // ── 8. Guardar todo y confirmar transacción ───────────────────
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                TempData["Success"] = $"Venta #{nuevaVenta.IdVenta} procesada exitosamente.";
+                TempData["Success"] = $"Venta #{nuevaVenta.IdVenta} procesada exitosamente. NCF: {ncfGenerado}";
                 return RedirectToAction(nameof(Details), new { id = nuevaVenta.IdVenta });
             }
             catch (DbUpdateException dbEx)
@@ -338,8 +296,7 @@ namespace ventaapp.Controllers
         // GET: Ventas/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var venta = await _context.Ventas
                 .Include(v => v.Cliente)
@@ -347,9 +304,7 @@ namespace ventaapp.Controllers
                     .ThenInclude(f => f.Producto)
                 .FirstOrDefaultAsync(m => m.IdVenta == id);
 
-            if (venta == null)
-                return NotFound();
-
+            if (venta == null) return NotFound();
             return View(venta);
         }
 
@@ -364,8 +319,7 @@ namespace ventaapp.Controllers
                     .Include(v => v.Facturas)
                     .FirstOrDefaultAsync(v => v.IdVenta == id);
 
-                if (venta == null)
-                    return NotFound();
+                if (venta == null) return NotFound();
 
                 if (venta.Estado == "Anulada")
                 {
@@ -373,25 +327,17 @@ namespace ventaapp.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Marcar venta como anulada
                 venta.Estado = "Anulada";
                 venta.Notas += $" | ANULADA: {motivoAnulacion} - {DateTime.Now:dd/MM/yyyy HH:mm}";
 
-                // Anular facturas y devolver stock
                 foreach (var factura in venta.Facturas)
                 {
                     factura.Estado = "Anulada";
-                    
                     var producto = await _context.Productos.FindAsync(factura.IdProducto);
-                    if (producto != null)
-                    {
-                        producto.Stock += 1;
-                        _context.Productos.Update(producto);
-                    }
+                    if (producto != null) producto.Stock += 1;
                 }
 
                 await _context.SaveChangesAsync();
-
                 TempData["Success"] = "Venta anulada exitosamente.";
                 return RedirectToAction(nameof(Details), new { id });
             }
@@ -410,50 +356,30 @@ namespace ventaapp.Controllers
 
             switch (periodo.ToLower())
             {
-                case "hoy":
-                    fechaInicio = DateTime.Today;
-                    break;
-                case "semana":
-                    fechaInicio = DateTime.Today.AddDays(-7);
-                    break;
-                case "mes":
-                    fechaInicio = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-                    break;
-                default:
-                    fechaInicio = DateTime.Today;
-                    break;
+                case "semana": fechaInicio = DateTime.Today.AddDays(-7); break;
+                case "mes":    fechaInicio = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1); break;
+                default:       fechaInicio = DateTime.Today; break;
             }
 
             var ventas = await _context.Ventas
                 .Include(v => v.Cliente)
-                .Where(v => v.FechaVenta >= fechaInicio && 
-                           v.FechaVenta <= fechaFin && 
-                           v.Estado == "Completada")
+                .Where(v => v.FechaVenta >= fechaInicio && v.FechaVenta <= fechaFin && v.Estado == "Completada")
                 .OrderByDescending(v => v.FechaVenta)
                 .ToListAsync();
 
-            // Estadísticas
-            ViewBag.Periodo = periodo;
-            ViewBag.FechaInicio = fechaInicio;
-            ViewBag.FechaFin = fechaFin;
-            ViewBag.TotalVentas = ventas.Count;
-            ViewBag.MontoTotal = ventas.Sum(v => v.Total);
+            ViewBag.Periodo      = periodo;
+            ViewBag.FechaInicio  = fechaInicio;
+            ViewBag.FechaFin     = fechaFin;
+            ViewBag.TotalVentas  = ventas.Count;
+            ViewBag.MontoTotal   = ventas.Sum(v => v.Total);
             ViewBag.PromedioVenta = ventas.Any() ? ventas.Average(v => v.Total) : 0;
-            
-            // Ventas por método de pago
             ViewBag.VentasPorMetodo = ventas
                 .GroupBy(v => v.MetodoPago)
                 .Select(g => new { Metodo = g.Key, Cantidad = g.Count(), Total = g.Sum(v => v.Total) })
                 .ToList();
-
-            // Top 5 clientes
             ViewBag.TopClientes = ventas
                 .GroupBy(v => v.Cliente)
-                .Select(g => new { 
-                    Cliente = g.Key?.NombreCompleto, 
-                    Cantidad = g.Count(), 
-                    Total = g.Sum(v => v.Total) 
-                })
+                .Select(g => new { Cliente = g.Key?.NombreCompleto, Cantidad = g.Count(), Total = g.Sum(v => v.Total) })
                 .OrderByDescending(x => x.Total)
                 .Take(5)
                 .ToList();
@@ -465,53 +391,33 @@ namespace ventaapp.Controllers
         public async Task<IActionResult> CierreCaja(DateTime? fecha)
         {
             var fechaCierre = fecha ?? DateTime.Today;
-            
+
             var ventas = await _context.Ventas
                 .Include(v => v.Cliente)
                 .Where(v => v.FechaVenta.Date == fechaCierre.Date && v.Estado == "Completada")
                 .OrderBy(v => v.FechaVenta)
                 .ToListAsync();
 
-            ViewBag.FechaCierre = fechaCierre;
-            ViewBag.TotalVentas = ventas.Count;
-            ViewBag.MontoTotal = ventas.Sum(v => v.Total);
-            ViewBag.TotalEfectivo = ventas.Where(v => v.MetodoPago == "Efectivo").Sum(v => v.Total);
-            ViewBag.TotalTarjeta = ventas.Where(v => v.MetodoPago == "Tarjeta").Sum(v => v.Total);
-            ViewBag.TotalTransferencia = ventas.Where(v => v.MetodoPago == "Transferencia").Sum(v => v.Total);
+            ViewBag.FechaCierre         = fechaCierre;
+            ViewBag.TotalVentas         = ventas.Count;
+            ViewBag.MontoTotal          = ventas.Sum(v => v.Total);
+            ViewBag.TotalEfectivo       = ventas.Where(v => v.MetodoPago == "Efectivo").Sum(v => v.Total);
+            ViewBag.TotalTarjeta        = ventas.Where(v => v.MetodoPago == "Tarjeta").Sum(v => v.Total);
+            ViewBag.TotalTransferencia  = ventas.Where(v => v.MetodoPago == "Transferencia").Sum(v => v.Total);
 
             return View(ventas);
         }
-
-        // Método auxiliar para generar número de comprobante
-        private string GenerarNumeroComprobante()
-        {
-            // Usar timestamp + random para mayor singularidad
-            return $"V-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
-        }
-
-        /*/ Método auxiliar para generar NCF (simulado)
-        private string GenerarNCF()
-        {
-            // En producción, esto debería conectarse con el sistema de la DGII
-            lock (_random) // Thread-safe
-            {
-                return $"B01{DateTime.Now:yyyyMMdd}{_random.Next(10000000, 99999999)}";
-            }
-        } */
 
         // API: Buscar producto
         [HttpGet]
         public async Task<JsonResult> BuscarProducto(string termino)
         {
             if (string.IsNullOrEmpty(termino) || termino.Length < 2)
-            {
                 return Json(new List<object>());
-            }
 
             var productos = await _context.Productos
-                .Where(p => p.Estado == "Activo" && 
-                           (p.NombreProducto.Contains(termino) || 
-                            p.CodigoProducto.Contains(termino)))
+                .Where(p => p.Estado == "Activo" &&
+                           (p.NombreProducto.Contains(termino) || p.CodigoProducto.Contains(termino)))
                 .Take(10)
                 .Select(p => new
                 {
