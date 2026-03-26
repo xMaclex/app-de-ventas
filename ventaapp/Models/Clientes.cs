@@ -14,13 +14,13 @@ public class Clientes
     [Required(ErrorMessage = "Digite el nombre")]
     [StringLength(100, ErrorMessage = "Los nombres no pueden exceder los 100 caracteres")]
     [Column("nombres")]
-    public string Nombres { get; set; } = string.Empty;
+    public string? Nombres { get; set; }
 
 
     [Required(ErrorMessage = "Digite sus apellidos")]
     [StringLength(100, ErrorMessage = "Los apellidos no pueden exceder los 100 caracteres")]
     [Column("apellidos")]
-    public string Apellidos { get; set; } = string.Empty;
+    public string? Apellidos { get; set; }
 
 
     [Required(ErrorMessage = "Digite el documento correspondiente")]

@@ -16,7 +16,7 @@ namespace ventaapp.Controllers
     {
         private readonly VentasDbContext _context;
         private const int MAX_INTENTOS_FALLIDOS = 5;
-        private const int MINUTOS_BLOQUEO = 30;
+        private const int MINUTOS_BLOQUEO = 60;
 
         public AuthController(VentasDbContext context)
         {

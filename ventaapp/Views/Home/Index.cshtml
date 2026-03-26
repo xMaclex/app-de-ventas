@@ -3,33 +3,177 @@
 }
 
 <div class="container-fluid mt-4">
+
+    @* ── KPIs ── *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card h-100" style="border-top: 3px solid #378ADD;">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Ventas hoy</p>
+                    <h3 class="fw-bold mb-0" style="color:#185FA5">@ViewBag.VentasHoy</h3>
+                    <small class="text-muted">transacciones</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100" style="border-top: 3px solid #1D9E75;">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Ingresos hoy</p>
+                    <h3 class="fw-bold mb-0" style="color:#0F6E56">$@ViewBag.TotalHoy.ToString("N0")</h3>
+                    <small class="text-muted">completadas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100" style="border-top: 3px solid #7F77DD;">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Ventas del mes</p>
+                    <h3 class="fw-bold mb-0" style="color:#534AB7">@ViewBag.VentasMes</h3>
+                    <small class="text-muted">$@ViewBag.TotalMes.ToString("N0") total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card h-100" style="border-top: 3px solid #D85A30;">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Stock bajo</p>
+                    <h3 class="fw-bold mb-0" style="color:#993C1D">@ViewBag.ProductosStockBajo</h3>
+                    <small class="text-muted">productos &lt;10 unidades</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Gráfica ventas 7 días ── *@
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-primary">
+        <div class="col-12">
+            <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title">Ventas Hoy</h6>
-                    <h2>@ViewBag.VentasHoy</h2>
-                    <small>Transacciones completadas</small>
+                    <div class="d-flex align-items-center mb-3">
+                        <div style="width:4px;height:20px;background:#378ADD;border-radius:2px;margin-right:10px;"></div>
+                        <h6 class="mb-0">Ventas últimos 7 días</h6>
+                    </div>
+                    <div style="position:relative;width:100%;height:220px;">
+                        <canvas id="chartBarras"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-success">
+    </div>
+
+    @* ── Top productos y Top clientes ── *@
+    <div class="row g-3">
+        <div class="col-12 col-md-6">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Total Hoy</h6>
-                    <h2>$@ViewBag.TotalHoy.ToString("N2")</h2>
-                    <small>Ingresos</small>
+                    <div class="d-flex align-items-center mb-3">
+                        <div style="width:4px;height:20px;background:#1D9E75;border-radius:2px;margin-right:10px;"></div>
+                        <h6 class="mb-0">Top 5 productos más vendidos</h6>
+                    </div>
+                    <div style="position:relative;width:100%;height:240px;">
+                        <canvas id="chartProductos"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-warning">
+        <div class="col-12 col-md-6">
+            <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="card-title">Productos Stock Bajo</h6>
-                    <h2>@ViewBag.ProductosStockBajo</h2>
-                    <small>&lt;10 unidades</small>
+                    <div class="d-flex align-items-center mb-3">
+                        <div style="width:4px;height:20px;background:#7F77DD;border-radius:2px;margin-right:10px;"></div>
+                        <h6 class="mb-0">Top 5 clientes del mes</h6>
+                    </div>
+                    <div style="position:relative;width:100%;height:240px;">
+                        <canvas id="chartClientes"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const labels7 = @Html.Raw(ViewBag.Labels7Dias ?? "[]");
+    const datos7  = @Html.Raw(ViewBag.Datos7Dias  ?? "[]");
+    const prodNombres  = @Html.Raw(ViewBag.TopProductosNombres  ?? "[]");
+    const prodCantidad = @Html.Raw(ViewBag.TopProductosCantidad ?? "[]");
+    const cliNombres  = @Html.Raw(ViewBag.TopClientesNombres  ?? "[]");
+    const cliTotales  = @Html.Raw(ViewBag.TopClientesTotales ?? "[]");
+
+    const gridColor = 'rgba(0,0,0,0.06)';
+    const tickColor = '#888';
+
+    new Chart(document.getElementById('chartBarras'), {
+        type: 'bar',
+        data: {
+            labels: labels7,
+            datasets: [{
+                label: 'Total ($)',
+                data: datos7,
+                backgroundColor: '#B5D4F4',
+                borderColor: '#378ADD',
+                borderWidth: 1.5,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: tickColor, font: { size: 11 }, autoSkip: false }, grid: { display: false } },
+                y: { ticks: { color: tickColor, font: { size: 11 },
+                     callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) },
+                     grid: { color: gridColor } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('chartProductos'), {
+        type: 'bar',
+        data: {
+            labels: prodNombres,
+            datasets: [{
+                label: 'Unidades',
+                data: prodCantidad,
+                backgroundColor: ['#9FE1CB','#5DCAA5','#1D9E75','#0F6E56','#085041'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
+                y: { ticks: { color: tickColor, font: { size: 11 } }, grid: { display: false } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('chartClientes'), {
+        type: 'bar',
+        data: {
+            labels: cliNombres,
+            datasets: [{
+                label: 'Total ($)',
+                data: cliTotales,
+                backgroundColor: ['#CECBF6','#AFA9EC','#7F77DD','#534AB7','#3C3489'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { color: tickColor, font: { size: 11 },
+                     callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) },
+                     grid: { color: gridColor } },
+                y: { ticks: { color: tickColor, font: { size: 11 } }, grid: { display: false } }
+            }
+        }
+    });
+</script>
+}

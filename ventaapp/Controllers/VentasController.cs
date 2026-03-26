@@ -167,8 +167,6 @@ namespace ventaapp.Controllers
                 }
 
                 // ── 5. Obtener y validar la secuencia NCF ─────────────────────
-// ── 5. Obtener y validar la secuencia NCF ─────────────────────
-
                 string tipoNcf      = venta.TipoComprobante ?? "Preforma";
                 string? ncfGenerado = null;
                 SecuenciaNcf? secuenciaNcf = null;
@@ -270,8 +268,22 @@ namespace ventaapp.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                // ── CAMBIO: obtener la primera factura generada y redirigir a su detalle ──
+                var primeraFactura = await _context.Facturas
+                    .Where(f => f.IdVenta == nuevaVenta.IdVenta)
+                    .OrderBy(f => f.IdFactura)
+                    .FirstOrDefaultAsync();
+
+                
                 TempData["Success"] = $"Venta #{nuevaVenta.IdVenta} procesada exitosamente. NCF: {ncfGenerado}";
-                return RedirectToAction(nameof(Details), new { id = nuevaVenta.IdVenta });
+                 if (primeraFactura != null)
+                {
+                    return RedirectToAction("Details", "Facturas", new { id = primeraFactura.IdFactura });
+                }
+                else
+                {
+                   return RedirectToAction(nameof(Details), new { id = nuevaVenta.IdVenta }); 
+                }
             }
             catch (DbUpdateException dbEx)
             {
@@ -301,7 +313,7 @@ namespace ventaapp.Controllers
             var venta = await _context.Ventas
                 .Include(v => v.Cliente)
                 .Include(v => v.Facturas)
-                    .ThenInclude(f => f.Producto)
+                .ThenInclude(f => f.Producto)
                 .FirstOrDefaultAsync(m => m.IdVenta == id);
 
             if (venta == null) return NotFound();
